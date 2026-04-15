@@ -1,0 +1,2246 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+  <title>QuantClaw: Precision Where It Matters for OpenClaw</title>
+  <style>
+    :root {
+      --bg-deep: #050d1a;
+      --bg-card: #0a1628;
+      --body-bg: #ffffff;
+      --body-bg-alt: #f7f8fc;
+      --card-bg: #ffffff;
+      --card-border: #e8edf5;
+      --blue-bright: #1a6fff;
+      --blue-glow: #2563eb;
+      --orange: #f05a00;
+      --orange-bright: #f97316;
+      --text-heading: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+      --text-faint: #94a3b8;
+      --silver: #c8d8ef;
+      --silver-dim: #9cb5d1;
+      --border: #e2e8f0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--body-bg);
+      color: var(--text-body);
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
+
+    img, video, iframe { display: block; max-width: 100%; }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 3rem;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 1px 12px rgba(15, 23, 42, 0.05);
+      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+
+    nav.scrolled {
+      background: rgba(255, 255, 255, 0.98);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    .nav-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      min-width: 0;
+    }
+
+    .nav-brand img {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.28));
+    }
+
+    .nav-brand span {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      background: linear-gradient(135deg, #7ab8ff, #ffaa60);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    nav.scrolled .nav-brand span {
+      background: linear-gradient(135deg, var(--blue-glow), var(--orange-bright));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 700;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--blue-glow); }
+    nav.scrolled .nav-links a { color: var(--text-muted); }
+    nav.scrolled .nav-links a:hover { color: var(--blue-glow); }
+
+    .nav-badge {
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--orange), var(--orange-bright));
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.38rem 0.95rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top center, rgba(26, 111, 255, 0.14), transparent 34%),
+        radial-gradient(circle at bottom center, rgba(240, 90, 0, 0.10), transparent 30%),
+        linear-gradient(180deg, #f8fbff 0%, #ffffff 62%, #f7f8fc 100%);
+    }
+
+    .hero::before,
+    .hero::after {
+      content: '';
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+      filter: blur(10px);
+    }
+
+    .hero::before {
+      width: 34rem;
+      height: 34rem;
+      top: -16rem;
+      left: -8rem;
+      background: rgba(37, 99, 235, 0.08);
+    }
+
+    .hero::after {
+      width: 28rem;
+      height: 28rem;
+      bottom: -12rem;
+      right: -8rem;
+      background: rgba(249, 115, 22, 0.09);
+    }
+
+    .hero-inner {
+      width: min(1120px, 100%);
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .hero-logo {
+      width: min(280px, 52vw);
+      margin: 0 auto 2rem;
+      filter: drop-shadow(0 10px 22px rgba(37, 99, 235, 0.14));
+      transform-origin: center;
+      animation: hero-logo-float 3.8s ease-in-out infinite;
+    }
+
+    @keyframes hero-logo-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(26, 111, 255, 0.08);
+      border: 1px solid rgba(122, 184, 255, 0.28);
+      color: var(--blue-glow);
+      padding: 0.45rem 1.1rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1.8rem;
+    }
+
+    h1 {
+      font-size: clamp(2.8rem, 6vw, 5.4rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      color: var(--text-heading);
+      max-width: 980px;
+      margin: 0 auto 1.4rem;
+    }
+
+    h1 .word-quant {
+      background: linear-gradient(135deg, var(--blue-glow), #7ab8ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h1 .word-claw {
+      background: linear-gradient(135deg, var(--orange), var(--orange-bright));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      max-width: 780px;
+      margin: 0 auto 2.6rem;
+      color: var(--text-muted);
+      font-size: 1.18rem;
+      line-height: 1.85;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 3.5rem;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-width: 180px;
+      padding: 0.9rem 2rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s, color 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue-bright), var(--blue-glow));
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 8px 28px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(37, 99, 235, 0.38);
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-weight: 600;
+      box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      border-color: rgba(122, 184, 255, 0.5);
+      color: var(--blue-glow);
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      overflow: hidden;
+      max-width: 980px;
+      margin: 0 auto;
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
+    }
+
+    .stat-item {
+      padding: 1.7rem 1.25rem;
+      border-right: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .stat-item:last-child { border-right: none; }
+
+    .stat-num {
+      font-size: 2.25rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: var(--text-heading);
+    }
+
+    .stat-num.orange {
+      background: linear-gradient(135deg, var(--orange), var(--orange-bright));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-num.blue {
+      background: linear-gradient(135deg, #60a5fa, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      margin-top: 0.25rem;
+      font-size: 0.78rem;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .light-body { background: var(--body-bg); }
+
+    section {
+      width: min(1120px, calc(100% - 4rem));
+      margin: 0 auto;
+      padding: 5.5rem 0;
+    }
+
+    .divider {
+      width: min(1120px, calc(100% - 4rem));
+      height: 1px;
+      background: var(--border);
+      margin: 0 auto;
+    }
+
+    .section-tag {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--orange);
+      margin-bottom: 0.85rem;
+    }
+
+    h2 {
+      font-size: clamp(1.85rem, 3.6vw, 2.9rem);
+      line-height: 1.2;
+      letter-spacing: -0.6px;
+      font-weight: 800;
+      color: var(--text-heading);
+      margin-bottom: 1.2rem;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      line-height: 1.3;
+      color: var(--text-heading);
+      margin-bottom: 0.9rem;
+      font-weight: 800;
+    }
+
+    p + p { margin-top: 1rem; }
+
+    .lead {
+      max-width: 820px;
+      color: var(--text-muted);
+      font-size: 1.06rem;
+      line-height: 1.9;
+      margin-bottom: 0.5rem;
+    }
+
+    .intro-grid,
+    .two-col-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 2rem;
+      align-items: start;
+      margin-top: 3rem;
+    }
+
+    .intro-grid {
+      grid-template-columns: 1fr;
+      max-width: 820px;
+    }
+
+    .content-card,
+    .media-card,
+    .table-card,
+    .quote-card,
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.04);
+    }
+
+    .content-card,
+    .quote-card,
+    .feature-card { padding: 1.8rem; }
+
+    .media-card {
+      padding: 1.3rem;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .media-card img,
+    .media-card video {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+    }
+
+    .card-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-faint);
+      margin-bottom: 1rem;
+    }
+
+    .question-list {
+      margin-top: 1.25rem;
+      padding: 1.2rem 1.3rem;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #eff6ff, #fff7ed);
+      border: 1px solid #dbeafe;
+    }
+
+    .question-list p {
+      font-size: 1rem;
+      color: var(--text-heading);
+      font-weight: 700;
+    }
+
+    .question-list p + p { margin-top: 0.75rem; }
+
+    .full-width-card {
+      margin-top: 2rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.4rem;
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.04);
+    }
+
+    .full-width-card h3 { margin-bottom: 1rem; }
+
+    .full-width-card video {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+    }
+
+    .table-card { margin-top: 2rem; }
+
+    .table-header {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      background: var(--body-bg-alt);
+    }
+
+    .window-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot.r { background: #ff5f57; }
+    .dot.y { background: #febc2e; }
+    .dot.g { background: #28c840; }
+
+    .table-title {
+      font-size: 0.88rem;
+      color: var(--text-faint);
+      font-weight: 700;
+    }
+
+    .nvfp4-col,
+    .nvfp4-score {
+      color: #7c3aed;
+      font-weight: 800;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 620px;
+    }
+
+    thead tr { background: #f8fafc; }
+
+    th {
+      padding: 1rem 1.2rem;
+      text-align: left;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: var(--text-faint);
+      font-weight: 800;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.95rem 1.2rem;
+      font-size: 0.92rem;
+      color: var(--text-body);
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #f8fafc; }
+
+    .findings-grid,
+    .feature-grid {
+      display: grid;
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+
+    .findings-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .insight-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.6rem;
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.04);
+    }
+
+    .insight-kicker {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--orange);
+      margin-bottom: 0.8rem;
+    }
+
+    .insight-card p {
+      color: var(--text-muted);
+      font-size: 0.94rem;
+    }
+
+    .image-panel {
+      margin-top: 2rem;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.4rem;
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.04);
+    }
+
+    .image-panel img,
+    .image-panel iframe {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #ffffff;
+    }
+
+    .image-caption {
+      margin-top: 0.9rem;
+      font-size: 0.88rem;
+      color: var(--text-faint);
+    }
+
+    .switch-card {
+      margin-top: 2rem;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.04);
+    }
+
+    .switch-head {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .switch-head h3 { margin-bottom: 0; }
+
+    .switch-group {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      padding: 0.35rem;
+      border-radius: 999px;
+      background: #f1f5f9;
+    }
+
+    .switch-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 0.65rem 1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    .switch-btn.is-active {
+      background: #ffffff;
+      color: var(--text-heading);
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+    }
+
+    .switch-panel { display: none; }
+    .switch-panel.is-active { display: block; }
+
+    .switch-intro {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .switch-panel .table-card {
+      margin-top: 0;
+      box-shadow: none;
+    }
+
+    .insight-callout {
+      margin-top: 1.25rem;
+      border-radius: 16px;
+      padding: 1.3rem 1.4rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      line-height: 1.85;
+    }
+
+    .sensitivity-switcher {
+      display: flex;
+      gap: 0;
+      margin-top: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--body-bg-alt);
+      padding: 0;
+      width: 100%;
+    }
+
+    .sensitivity-switcher .switch-btn {
+      flex: 1;
+      border-radius: 0;
+      padding: 1rem 1.25rem;
+      box-shadow: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+    }
+
+    .sensitivity-switcher .switch-btn + .switch-btn {
+      border-left: 1px solid var(--border);
+    }
+
+    .sensitivity-switcher .switch-btn:hover {
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    .sensitivity-switcher .switch-btn.is-active {
+      box-shadow: none;
+    }
+
+    .sensitivity-switcher .switch-btn[data-target='high'].is-active {
+      background: linear-gradient(135deg, #fef2f2, #fff1f2);
+      color: #dc2626;
+      box-shadow: inset 0 -3px 0 #dc2626;
+    }
+
+    .sensitivity-switcher .switch-btn[data-target='low'].is-active {
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      color: #16a34a;
+      box-shadow: inset 0 -3px 0 #16a34a;
+    }
+
+    .sensitivity-switcher .switch-btn[data-target='moderate'].is-active {
+      background: linear-gradient(135deg, #fffbeb, #fefce8);
+      color: #d97706;
+      box-shadow: inset 0 -3px 0 #d97706;
+    }
+
+    .tab-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: #e2e8f0;
+      color: var(--text-muted);
+    }
+
+    .sensitivity-switcher .switch-btn[data-target='high'].is-active .tab-count {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .sensitivity-switcher .switch-btn[data-target='low'].is-active .tab-count {
+      background: #16a34a;
+      color: #fff;
+    }
+
+    .sensitivity-switcher .switch-btn[data-target='moderate'].is-active .tab-count {
+      background: #d97706;
+      color: #fff;
+    }
+
+    .task-type-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      color: var(--text-heading);
+    }
+
+    .switch-panel[data-panel='sensitivity'][data-name='high'] .insight-callout {
+      background: linear-gradient(135deg, #fef2f2, #fff1f2);
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+
+    .switch-panel[data-panel='sensitivity'][data-name='low'] .insight-callout {
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+
+    .switch-panel[data-panel='sensitivity'][data-name='moderate'] .insight-callout {
+      background: linear-gradient(135deg, #fffbeb, #fefce8);
+      border-color: #fde68a;
+      color: #92400e;
+    }
+
+    .findings-wrap {
+      margin-top: 2rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .findings-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--text-faint);
+      background: var(--body-bg-alt);
+    }
+
+    .bench-table-wrap {
+      overflow-x: auto;
+    }
+
+    .bench-table-wrap table {
+      min-width: 700px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .badge-green { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    .badge-blue { background: #eff6ff; color: var(--blue-glow); border: 1px solid #bfdbfe; }
+    .badge-purple { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+
+    .tradeoff-tabs {
+      display: flex;
+      gap: 0;
+      margin: 2rem 0 0;
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      background: var(--body-bg-alt);
+      padding: 0;
+    }
+
+    .tradeoff-tabs .tradeoff-tab {
+      flex: 1;
+      padding: 1rem 1.2rem;
+      text-align: center;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--text-muted);
+    }
+
+    .tradeoff-tabs .tradeoff-tab + .tradeoff-tab {
+      border-left: 1px solid var(--border);
+    }
+
+    .tradeoff-tabs .tradeoff-tab:hover {
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    .tradeoff-tabs .tradeoff-tab.is-active {
+      background: #fff;
+      color: var(--blue-glow);
+      box-shadow: inset 0 -3px 0 var(--blue-glow);
+    }
+
+    .tradeoff-panel .findings-wrap {
+      margin-top: 0;
+      border-radius: 0 0 16px 16px;
+    }
+
+    .tradeoff-panel .recommendation {
+      margin-top: 1.4rem;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+      border: 1px solid #bfdbfe;
+      color: var(--text-body);
+    }
+
+    .benefits-wrap {
+      margin-top: 1.5rem;
+    }
+
+    .benefits-title {
+      margin-top: 2.2rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .benefits-copy {
+      color: var(--text-body);
+      max-width: none;
+      width: 100%;
+      margin-bottom: 1.1rem;
+    }
+
+    .benefits-wrap .content-card {
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .benefits-wrap tbody td:first-child {
+      font-weight: 800;
+      color: var(--text-heading);
+    }
+
+    .numbered-points {
+      margin-top: 1rem;
+      padding-left: 1.3rem;
+      color: var(--text-body);
+    }
+
+    .numbered-points li + li { margin-top: 0.8rem; }
+
+    .recommendation {
+      margin-top: 1.25rem;
+      padding: 1.3rem 1.4rem;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #eff6ff, #fff7ed);
+      border: 1px solid #dbeafe;
+      color: var(--text-body);
+      line-height: 1.85;
+    }
+
+    .router-hero {
+      margin-top: 2rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.04);
+    }
+
+    .router-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.6rem;
+      align-items: start;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.84rem;
+      color: #0f172a;
+      line-height: 1.75;
+    }
+
+    .feature-card p {
+      color: var(--text-body);
+      font-size: 0.95rem;
+      line-height: 1.85;
+    }
+
+    .diagram-card,
+    .dashboard-card {
+      margin-top: 1rem;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #ffffff;
+    }
+
+    .diagram-card { padding: 1.25rem; }
+    .diagram-card pre { font-size: 0.82rem; line-height: 1.7; color: var(--text-body); }
+
+    /* Lightbox */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      cursor: zoom-out;
+    }
+
+    .lightbox-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .lightbox-overlay img {
+      max-width: 92vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      transform: scale(0.92);
+      transition: transform 0.25s ease;
+    }
+
+    .lightbox-overlay.is-open img {
+      transform: scale(1);
+    }
+
+    .zoomable {
+      cursor: zoom-in;
+      transition: filter 0.2s;
+    }
+
+    .zoomable:hover {
+      filter: brightness(1.04);
+    }
+
+    /* Enhanced table cells */
+    .score-bar-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .score-bar-track {
+      flex: 1;
+      height: 6px;
+      border-radius: 99px;
+      background: #f1f5f9;
+      overflow: hidden;
+      min-width: 60px;
+      max-width: 160px;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    .score-bar-fill.positive {
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    }
+
+    .score-bar-fill.negative {
+      background: linear-gradient(90deg, #f97316, #fb923c);
+    }
+
+    .score-val {
+      font-weight: 700;
+      font-size: 0.88rem;
+      min-width: 62px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .score-val.positive { color: #2563eb; }
+    .score-val.negative { color: #ea580c; }
+    .score-val.neutral { color: var(--text-faint); }
+
+    /* Routing table precision-preferred row tinting */
+    .sensitivity-table td,
+    .routing-table td {
+      padding: 0.85rem 1.2rem;
+    }
+
+    .sensitivity-table th,
+    .routing-table th {
+      padding: 0.85rem 1.2rem;
+    }
+
+    .routing-table .rank-cell {
+      font-weight: 800;
+      color: var(--text-faint);
+      font-size: 0.82rem;
+      width: 48px;
+      text-align: center;
+    }
+
+    .routing-table .delta-cell {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    .delta-positive { color: #2563eb; }
+    .delta-negative { color: #ea580c; }
+    .delta-neutral { color: var(--text-faint); }
+    .dashboard-card img { width: 100%; border: none; }
+
+    .quote-card {
+      margin-top: 2rem;
+      background: linear-gradient(135deg, #eff6ff, #fff7ed);
+      border-color: #dbeafe;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quote-card::before {
+      content: '"';
+      position: absolute;
+      top: -0.3rem;
+      left: 1rem;
+      font-size: 5rem;
+      line-height: 1;
+      color: rgba(37, 99, 235, 0.15);
+      font-weight: 900;
+    }
+
+    .quote-card blockquote {
+      position: relative;
+      z-index: 1;
+      font-size: 1.28rem;
+      line-height: 1.75;
+      font-style: italic;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin-bottom: 1.6rem;
+    }
+
+    .no-frame {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      border-radius: 0;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .table-card.no-frame .table-header {
+      background: transparent;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table-card.no-frame .table-wrap {
+      border-bottom: 1px solid var(--border);
+    }
+
+    #background {
+      text-align: left;
+    }
+
+    #background .lead {
+      max-width: none;
+      width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    #background .intro-grid {
+      max-width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+      grid-template-columns: 1fr;
+    }
+
+    #background .content-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+      gap: 1rem 2.5rem;
+      align-items: start;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      text-align: left;
+    }
+
+    #background .content-card > p {
+      grid-column: 1;
+      max-width: 100%;
+    }
+
+    #background .question-list {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      max-width: none;
+      margin: 0;
+      text-align: left;
+      padding: 1.4rem 1.5rem;
+      align-self: stretch;
+    }
+
+    #background .question-list .card-label {
+      margin-bottom: 0.8rem;
+      color: var(--orange);
+      text-align: left;
+    }
+
+    #background .question-list p {
+      font-size: 1.08rem;
+      font-weight: 800;
+      line-height: 1.75;
+      text-align: left;
+    }
+
+    #background .full-width-card,
+    #background .full-width-card h3,
+    #background .full-width-card p {
+      text-align: left;
+    }
+
+    .section-note {
+      font-size: 0.88rem;
+      color: var(--text-faint);
+      margin: 0.2rem 0 1.2rem;
+    }
+
+    #findings .lead {
+      max-width: none;
+      width: 100%;
+    }
+
+    .routing-intro {
+      max-width: none;
+      width: 100%;
+      margin-bottom: 1.8rem;
+    }
+
+    .routing-intro p {
+      color: var(--text-body);
+    }
+
+    .routing-chart {
+      margin-top: 2.4rem;
+    }
+
+    .quantclaw-overview {
+      margin-bottom: 1.6rem;
+    }
+
+    .quantclaw-overview img {
+      width: 100%;
+    }
+
+    .benefit-cost,
+    .benefit-cost-head {
+      color: #dc2626;
+      font-weight: 800;
+    }
+
+    .benefit-time,
+    .benefit-time-head {
+      color: var(--blue-glow);
+      font-weight: 800;
+    }
+
+    .benefit-row-highlight td {
+      background: linear-gradient(90deg, rgba(37, 99, 235, 0.05), rgba(240, 90, 0, 0.05));
+    }
+
+    .benefit-row-highlight:hover td {
+      background: linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(240, 90, 0, 0.08));
+    }
+
+    .model-summary-table tbody td:first-child {
+      font-weight: 800;
+      color: var(--text-heading);
+    }
+
+    .feature-media {
+      margin-top: 1rem;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #ffffff;
+    }
+
+    .feature-media img {
+      width: 100%;
+      display: block;
+    }
+
+    .diagram-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .diagram-scroll pre {
+      white-space: pre;
+      min-width: max-content;
+    }
+
+    .qc3d-shell {
+      margin-top: 1.25rem;
+      border-radius: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+
+    .qc3d-head {
+      padding: 1.35rem 1.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background:
+        linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(255, 247, 237, 0.78) 100%);
+    }
+
+    .qc3d-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      color: var(--text-heading);
+      margin-bottom: 0.35rem;
+    }
+
+    .qc3d-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .qc3d-main-layout {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      width: 100%;
+      margin: 0;
+    }
+
+    .qc3d-chart-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+      height: 620px;
+      border-top: 1px solid rgba(255,255,255,.78);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.08), transparent 30%),
+        linear-gradient(180deg, #f8fafc 0%, #f3f6fb 100%);
+    }
+
+    .qc3d-chart-wrap canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      cursor: grab;
+    }
+
+    .qc3d-chart-wrap canvas:active { cursor: grabbing; }
+
+    .qc3d-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(255,255,255,.97);
+      border: 1px solid #d7dfeb;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 12px;
+      display: none;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.10);
+      z-index: 10;
+      backdrop-filter: blur(6px);
+      color: var(--text-body);
+    }
+
+    .qc3d-tooltip.show { display: block; }
+
+    .qc3d-tt-name {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .qc3d-tt-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 2px 0;
+    }
+
+    .qc3d-tt-row span { color: var(--text-faint); }
+    .qc3d-tt-row strong { color: var(--text-heading); }
+
+    .qc3d-hint {
+      padding: 0.85rem 1.2rem 0;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .qc3d-hint span { color: #7c3aed; }
+
+    .qc3d-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 12px;
+      justify-content: center;
+      padding: 0.75rem 1.2rem 1.05rem;
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.72) 0%, rgba(255, 255, 255, 1) 100%);
+    }
+
+    .qc3d-leg-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+
+    .qc3d-leg-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,.08);
+    }
+
+    @media (max-width: 720px) {
+      .qc3d-chart-wrap { height: 480px; }
+      .qc3d-head { padding: 1.1rem 1rem 0.85rem; }
+      .qc3d-hint,
+      .qc3d-legend { padding-left: 0.9rem; padding-right: 0.9rem; }
+    }
+
+    footer {
+      padding: 3rem 2rem;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      background: var(--body-bg-alt);
+      color: var(--text-faint);
+      font-size: 0.84rem;
+      letter-spacing: 0.3px;
+    }
+
+    @media (max-width: 960px) {
+      .intro-grid,
+      .two-col-grid,
+      .router-layout,
+      .findings-grid,
+      .feature-grid { grid-template-columns: 1fr; }
+
+      .stats-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stat-item:nth-child(2) { border-right: none; }
+      .stat-item:nth-child(-n + 2) { border-bottom: 1px solid var(--border); }
+      #background .content-card { grid-template-columns: 1fr; }
+      #background .question-list {
+        grid-column: auto;
+        grid-row: auto;
+        margin-top: 1.4rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.25rem; }
+      .nav-links, .nav-badge { display: none; }
+      section, .divider { width: min(1120px, calc(100% - 2.4rem)); }
+      .hero { padding: 7rem 1.2rem 3rem; }
+      .hero-sub { font-size: 1.02rem; }
+      .stats-bar { grid-template-columns: 1fr; }
+      .stat-item {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .stat-item:last-child { border-bottom: none; }
+      table { min-width: 560px; }
+      .switch-group { width: 100%; }
+      .switch-btn { flex: 1 1 auto; }
+    }
+  </style>
+</head>
+<body>
+  <nav id='siteNav'>
+    <div class='nav-brand'>
+      <img src='./figs/QuantClaw-notext.png' alt='QuantClaw logo' />
+      <span>QuantClaw</span>
+    </div>
+    <div class='nav-links'>
+      <a href='#background'>Background</a>
+      <a href='#findings'>Findings</a>
+      <a href='#routing-policy'>Routing Policy</a>
+      <a href='#quantclaw'>QuantClaw</a>
+    </div>
+    <div class='nav-badge'>Research Blog</div>
+  </nav>
+
+  <header class='hero'>
+    <div class='hero-inner'>
+      <img class='hero-logo' src='./figs/QuantClaw_logo_notext_v2.png' alt='QuantClaw Logo' />
+      <div class='hero-tag'>OpenClaw Quantization Research</div>
+      <h1><span class='word-quant'>Quant</span><span class='word-claw'>Claw</span>: Precision Where It Matters for OpenClaw</h1>
+      <p class='hero-sub'>
+        Not every query needs a supercomputer. We benchmarked model quantization across OpenClaw's full task spectrum and developed a router plugin that sends each query exactly where it belongs. Cut costs by 20%, speed up 10% without sacrificing capabilities.
+      </p>
+      <div class='hero-actions'>
+        <a class='btn-primary' href='#quantclaw'>Explore QuantClaw →</a>
+        <a class='btn-secondary' href='#' target='_blank' rel='noreferrer'>GitHub Link</a>
+        <a class='btn-secondary' href='#' target='_blank' rel='noreferrer'>Paper Link</a>
+      </div>
+      <div class='stats-bar'>
+        <div class='stat-item'><div class='stat-num blue'>24</div><div class='stat-label'>Task Types</div></div>
+        <div class='stat-item'><div class='stat-num'>104</div><div class='stat-label'>Tasks</div></div>
+        <div class='stat-item'><div class='stat-num orange'>20%</div><div class='stat-label'>Cost Cut</div></div>
+        <div class='stat-item'><div class='stat-num blue'>10%</div><div class='stat-label'>Speed Up</div></div>
+      </div>
+    </div>
+  </header>
+
+  <div class='light-body'>
+    <section id='background'>
+      <div class='section-tag'>Background</div>
+      <h2>Why Quantization Matters for OpenClaw</h2>
+      <p class='lead'>
+        OpenClaw has emerged as one of the hottest open-source AI assistant projects of 2026. By combining large language models with browser control, Shell execution, memory, and automation tools, it turns the AI assistant from a chatbot into an agent that can actually do things. That combination of autonomy and usability is exactly why OpenClaw has attracted so much attention: it promises not just to answer questions, but to complete real workflows on the user’s behalf.
+      </p>
+
+      <div class='intro-grid'>
+        <div class='content-card'>
+          <p><strong>However, this capability comes at a steep token cost.</strong> Even a seemingly simple query can trigger far more than a single response, as OpenClaw often has to carry long system prompts, conversation history, tool outputs, and multi-step reasoning into each API call. In practice, users are paying not only for the answer itself, but for the overhead of running a full agent system.</p>
+          <p><strong>Model quantization can make models cheaper and faster to run.</strong> By reducing numerical precision from 32-bit floats down to 4-bits or even 2-bits, quantization can dramatically shrink memory footprint and compute. However, the effect of quantization on agentic tasks is unclear. This motivates us to explore the following questions:</p>
+          <div class='question-list'>
+            <div class='card-label'>Research Questions</div>
+            <p>(1) How does quantization affect OpenClaw overall?</p>
+            <p>(2) How does its impact vary across different task types?</p>
+            <p>(3) How much cost can we actually save and how much speedup can we achieve in practice through quantization?</p>
+          </div>
+        </div>
+      </div>
+
+      <div class='full-width-card'>
+        <h3>Demo</h3>
+        <video src='./QuantClaw_demo.mp4' controls></video>
+      </div>
+    </section>
+
+    <div class='divider'></div>
+
+    <section id='findings'>
+      <div class='section-tag'>Findings</div>
+      <h2>Quantization Impact on OpenClaw</h2>
+      <p class='lead'>
+        To comprehensively understand how quantization affects OpenClaw's performance, we conducted an extensive study using <strong>Claw-Eval</strong> (release v0.0.0) which spans <strong>24 distinct task types</strong>, <strong>104 tasks</strong>, and <strong>6 models</strong> at scales ranging from <strong>9B to 744B</strong>. Each task was executed over 6 independent trials and evaluated via LLM judge and automated metrics across both BF16/FP8 (high-precision) and NVFP4 (quantized) configurations.
+      </p>
+
+      <div class='table-card'>
+        <div class='table-header'>
+          <div class='window-dots'><span class='dot r'></span><span class='dot y'></span><span class='dot g'></span></div>
+          <div class='table-title'>Model Summary</div>
+        </div>
+        <div class='bench-table-wrap'>
+          <table class='model-summary-table'>
+            <thead>
+              <tr>
+                <th>Models</th>
+                <th>Parameters (B)</th>
+                <th>BF16/FP8 Score</th>
+                <th class='nvfp4-col'>NVFP4 Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>GLM-4.7-Flash</td><td>30</td><td>0.6370</td><td class='nvfp4-score'>0.6034</td></tr>
+              <tr><td>GLM-5</td><td>744</td><td>0.7130</td><td class='nvfp4-score'>0.7229</td></tr>
+              <tr><td>MiniMax-M2.5</td><td>229</td><td>0.6760</td><td class='nvfp4-score'>0.6823</td></tr>
+              <tr><td>Qwen3.5-9B</td><td>9</td><td>0.4267</td><td class='nvfp4-score'>0.4107</td></tr>
+              <tr><td>Qwen3.5-35B-A3B</td><td>35</td><td>0.6686</td><td class='nvfp4-score'>0.6549</td></tr>
+              <tr><td>Qwen3.5-397B-A17B</td><td>397</td><td>0.7048</td><td class='nvfp4-score'>0.6937</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class='image-panel no-frame'>
+        <h3>Scaling Effect</h3>
+        <p>
+          Quantization degradation exhibits a power-type scaling behavior with model size. Our sweep across 9B-744B models shows that smaller models (&lt;30B) experience 3-5% performance degradation under NVFP4 quantization, whereas large models (200B+) degrade by less than 2%, and in some cases even achieve slight performance gains (+0.9% to +1.4%).
+        </p>
+        <img src='./figs/scaling_effect.png' alt='Scaling effect figure' />
+      </div>
+
+      <div class='switch-card no-frame'>
+        <div class='switch-head'>
+          <h3>Task Sensitivity Analysis: Quantization Varies by Task Types</h3>
+          <div class='switch-group sensitivity-switcher' role='tablist' aria-label='Task sensitivity switch'>
+            <button class='switch-btn is-active' type='button' role='tab' aria-selected='true' data-switch='sensitivity' data-target='high'>🔴 High Sensitivity <span class='tab-count'>9</span></button>
+            <button class='switch-btn' type='button' role='tab' aria-selected='false' data-switch='sensitivity' data-target='low'>🟢 Low Sensitivity <span class='tab-count'>6</span></button>
+            <button class='switch-btn' type='button' role='tab' aria-selected='false' data-switch='sensitivity' data-target='moderate'>🟡 Moderate Sensitivity <span class='tab-count'>9</span></button>
+          </div>
+        </div>
+
+        <p class='switch-intro'>Based on the experimental results, we divide different task types into three levels: 🔴 High Sensitivity, 🟢 Low Sensitivity and 🟡 Moderate Sensitivity.</p>
+
+        <div class='switch-panel is-active' data-panel='sensitivity' data-name='high'>
+          <p class='switch-intro'>These tasks suffer significant performance degradation with quantization, requiring BF16/FP8 precision for reliable execution:</p>
+          <div class='table-card no-frame'>
+            <div class='table-wrap'>
+              <table>
+                <thead><tr><th>Task Category</th><th>Score Gain (BF16/FP8-NVFP4)</th></tr></thead>
+                <tbody>
+                  <tr><td><span class='task-type-label'>💻 Coding</span></td><td>+12.27%</td></tr>
+                  <tr><td><span class='task-type-label'>📋 Compliance</span></td><td>+8.73%</td></tr>
+                  <tr><td><span class='task-type-label'>🖥️ Terminal</span></td><td>+6.69%</td></tr>
+                  <tr><td><span class='task-type-label'>🛡️ Safety</span></td><td>+6.50%</td></tr>
+                  <tr><td><span class='task-type-label'>🧩 Synthesis</span></td><td>+6.39%</td></tr>
+                  <tr><td><span class='task-type-label'>🔄 Workflow</span></td><td>+6.15%</td></tr>
+                  <tr><td><span class='task-type-label'>📂 Organization</span></td><td>+3.57%</td></tr>
+                  <tr><td><span class='task-type-label'>⚙️ Operations</span></td><td>+2.67%</td></tr>
+                  <tr><td><span class='task-type-label'>🔐 Security</span></td><td>+2.42%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class='insight-callout'>
+            <strong>Key Insight:</strong> Tasks involving <strong>Code generation</strong>, <strong>Safety-critical decisions</strong> and <strong>Complex operational workflows</strong> exhibit high quantization sensitivity. These domains share a common trait: they require precise boundary discrimination where small perturbations in model outputs can trigger qualitatively wrong actions, such as incorrect tool calls, policy violations, or safety failures. It suggests that these tasks may require BF16/FP8 precision to maintain reliability and accuracy.
+          </div>
+        </div>
+
+        <div class='switch-panel' data-panel='sensitivity' data-name='low'>
+          <p class='switch-intro'>These tasks maintain or improve performance with NVFP4 quantization across model scales:</p>
+          <div class='table-card no-frame'>
+            <div class='table-wrap'>
+              <table>
+                <thead><tr><th>Task Category</th><th>Score Gain (BF16/FP8-NVFP4)</th></tr></thead>
+                <tbody>
+                  <tr><td><span class='task-type-label'>🔬 Research</span></td><td>-2.64%</td></tr>
+                  <tr><td><span class='task-type-label'>🖼️ Multimodal</span></td><td>-2.71%</td></tr>
+                  <tr><td><span class='task-type-label'>📖 Comprehension</span></td><td>-4.02%</td></tr>
+                  <tr><td><span class='task-type-label'>📚 Knowledge</span></td><td>-6.29%</td></tr>
+                  <tr><td><span class='task-type-label'>📝 Office QA</span></td><td>-6.84%</td></tr>
+                  <tr><td><span class='task-type-label'>📊 Data Analysis</span></td><td>-10.06%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class='insight-callout'>
+            <strong>Key Insight:</strong> <strong>Knowledge retrieval</strong>, <strong>analytical</strong>, and <strong>QA tasks</strong> tend to tolerate quantization. The consistent performance gains across comprehension, research, and analytical tasks suggest that NVFP4 may function as an implicit regularizer to encourage generalizable representations.
+          </div>
+        </div>
+
+        <div class='switch-panel' data-panel='sensitivity' data-name='moderate'>
+          <p class='switch-intro'>These tasks exhibit variable quantization tolerance:</p>
+          <div class='table-card no-frame'>
+            <div class='table-wrap'>
+              <table>
+                <thead><tr><th>Task Category</th><th>Score Gain (BF16/FP8-NVFP4)</th></tr></thead>
+                <tbody>
+                  <tr><td><span class='task-type-label'>✍️ Rewriting</span></td><td>+1.37%</td></tr>
+                  <tr><td><span class='task-type-label'>📁 File_ops</span></td><td>+1.34%</td></tr>
+                  <tr><td><span class='task-type-label'>💰 Finance</span></td><td>+1.17%</td></tr>
+                  <tr><td><span class='task-type-label'>📰 Content</span></td><td>+0.83%</td></tr>
+                  <tr><td><span class='task-type-label'>🛒 Procurement</span></td><td>+0.73%</td></tr>
+                  <tr><td><span class='task-type-label'>✅ Productivity</span></td><td>+0.63%</td></tr>
+                  <tr><td><span class='task-type-label'>🛠️ Ops</span></td><td>+0.50%</td></tr>
+                  <tr><td><span class='task-type-label'>🧠 Memory</span></td><td>0.00%</td></tr>
+                  <tr><td><span class='task-type-label'>✉️ Communication</span></td><td>-0.48%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class='insight-callout'>
+            <strong>Key Insight:</strong> <strong>Memory</strong>, <strong>Simple operations</strong> and <strong>Communication</strong> tasks show moderate sensitivity to quantization. These tasks can flexibly use either precision format depending on cost-speed performance requirements.
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <div class='divider'></div>
+
+    <section id='routing-policy'>
+      <div class='section-tag'>Routing Policy</div>
+      <h2>Score, Speed and Cost</h2>
+      <div class='routing-intro'>
+        <p>
+          Based on the task sensitivity analysis and observed tradeoffs between score, speed, and cost, we derive a deployment guideline for choosing between BF16/FP8 and NVFP4 quantization along three optimization targets:
+        </p>
+        <ol class='numbered-points'>
+          <li><strong>Score vs. Speed (Faster)</strong>: Minimize inference latency without quality degradation - prioritize tasks where latency reduction outweighs marginal score changes</li>
+          <li><strong>Score vs. Cost (Cheaper)</strong>: Minimize inference spend at parity - target tasks where quality holds steady or improves as precision drops</li>
+          <li><strong>Score vs. Cost vs. Speed</strong>: Optimize all three simultaneously - identify tasks where faster, cheaper inference also yields better outputs</li>
+        </ol>
+      </div>
+
+      <div class='switch-card no-frame'>
+        <div class='switch-head'>
+          <h3>Routing Views</h3>
+          <div class='switch-group tradeoff-tabs' role='tablist' aria-label='Routing policy switch'>
+            <button class='switch-btn tradeoff-tab is-active' type='button' role='tab' aria-selected='true' data-switch='routing' data-target='speed'>🏆 Score vs Speed</button>
+            <button class='switch-btn tradeoff-tab' type='button' role='tab' aria-selected='false' data-switch='routing' data-target='cost'>💰 Score vs Cost</button>
+          </div>
+        </div>
+        <p class='section-note'>Click the tabs to switch views.</p>
+
+        <div class='switch-panel tradeoff-panel is-active' data-panel='routing' data-name='speed'>
+          <div class='findings-wrap'>
+            <div class='findings-header'>
+              <div class='window-dots'><span class='dot r'></span><span class='dot y'></span><span class='dot g'></span></div>
+              <span>🏆 Score vs Speed</span>
+            </div>
+            <div class='bench-table-wrap'>
+              <table>
+                <thead>
+                  <tr><th>Rank</th><th>Task Category</th><th>Preferred Precision</th><th>Speed Δ (BF16-NVFP4)</th><th>Score Δ (BF16-NVFP4)</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+13.58%</td><td>+12.27%</td></tr>
+                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+7.32%</td><td>+8.73%</td></tr>
+                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+16.66%</td><td>+6.69%</td></tr>
+                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-9.12%</td><td>+6.50%</td></tr>
+                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-4.88%</td><td>+6.39%</td></tr>
+                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-13.64%</td><td>+6.15%</td></tr>
+                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+1.42%</td><td>+3.57%</td></tr>
+                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-3.07%</td><td>+2.67%</td></tr>
+                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-17.38%</td><td>+2.42%</td></tr>
+                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+0.32%</td><td>+1.37%</td></tr>
+                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+9.96%</td><td>+1.34%</td></tr>
+                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+6.79%</td><td>+1.17%</td></tr>
+                  <tr><td>13</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-5.08%</td><td>+0.83%</td></tr>
+                  <tr><td>14</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-12.13%</td><td>+0.73%</td></tr>
+                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+2.62%</td><td>+0.63%</td></tr>
+                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-1.26%</td><td>+0.50%</td></tr>
+                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+33.86%</td><td>0.00%</td></tr>
+                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-14.30%</td><td>-0.48%</td></tr>
+                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-26.09%</td><td>-2.64%</td></tr>
+                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+46.88%</td><td>-2.71%</td></tr>
+                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+7.69%</td><td>-4.02%</td></tr>
+                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-0.01%</td><td>-6.29%</td></tr>
+                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-4.41%</td><td>-6.84%</td></tr>
+                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+0.75%</td><td>-10.06%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class='recommendation'><strong>Recommendation:</strong> For <strong>speed-critical applications</strong>, NVFP4 is preferred for the bottom 7 tasks, delivering faster inference or maintained/improved quality. Reserve BF16/FP8 for the top 17 precision-critical tasks where speed degradation is acceptable to preserve accuracy.</div>
+        </div>
+
+        <div class='switch-panel tradeoff-panel' data-panel='routing' data-name='cost'>
+          <div class='findings-wrap'>
+            <div class='findings-header'>
+              <div class='window-dots'><span class='dot r'></span><span class='dot y'></span><span class='dot g'></span></div>
+              <span>💰 Score vs Cost</span>
+            </div>
+            <div class='bench-table-wrap'>
+              <table>
+                <thead>
+                  <tr><th>Rank</th><th>Task Category</th><th>Preferred Precision</th><th>Cost Δ (BF16-NVFP4)</th><th>Score Δ (BF16-NVFP4)</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-30.58%</td><td>+12.27%</td></tr>
+                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-0.68%</td><td>+8.73%</td></tr>
+                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+30.56%</td><td>+6.69%</td></tr>
+                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+17.94%</td><td>+6.50%</td></tr>
+                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+11.82%</td><td>+6.39%</td></tr>
+                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+7.55%</td><td>+6.15%</td></tr>
+                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+24.82%</td><td>+3.57%</td></tr>
+                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+17.83%</td><td>+2.67%</td></tr>
+                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+5.79%</td><td>+2.42%</td></tr>
+                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+24.97%</td><td>+1.37%</td></tr>
+                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+20.66%</td><td>+1.34%</td></tr>
+                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+13.89%</td><td>+1.17%</td></tr>
+                  <tr><td>13</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-2.46%</td><td>+0.73%</td></tr>
+                  <tr><td>14</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+19.22%</td><td>+0.83%</td></tr>
+                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+25.40%</td><td>+0.63%</td></tr>
+                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+13.23%</td><td>+0.50%</td></tr>
+                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+15.70%</td><td>0.00%</td></tr>
+                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+19.22%</td><td>-0.48%</td></tr>
+                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+3.87%</td><td>-2.64%</td></tr>
+                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-1.92%</td><td>-2.71%</td></tr>
+                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-0.56%</td><td>-2.71%</td></tr>
+                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+15.29%</td><td>-6.29%</td></tr>
+                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+25.77%</td><td>-6.84%</td></tr>
+                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+13.59%</td><td>-10.06%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class='recommendation'><strong>Recommendation:</strong> For <strong>cost-critical applications</strong>, NVFP4 is preferred for the bottom 11 tasks, delivering positive or neutral score gain impact (-10.06% to +0.83%) with significant cost savings. Reserve BF16/FP8 for the top 13 tasks where quantization severely degrades score performance, particularly Coding, Safety, and Compliance where score loss exceeds 5% and justifies the precision premium.</div>
+        </div>
+      </div>
+
+      <div class='image-panel no-frame routing-chart'>
+        <h3>⚖️ Score vs Speed vs Cost</h3>
+        <div class='qc3d-shell'>
+          <div class='qc3d-head'>
+            <div class='qc3d-subtitle'>X: SPEED_GAIN &middot; Y (vertical): SCORE_GAIN &middot; Z: COST_GAIN</div>
+          </div>
+          <div class='qc3d-main-layout'>
+            <div class='qc3d-chart-wrap' id='qc3d-wrap'>
+              <div class='qc3d-tooltip' id='qc3d-tt'></div>
+            </div>
+          </div>
+          <div class='qc3d-hint'>
+            <span>&#x21ba;</span> Drag to rotate &nbsp;&middot;&nbsp;
+            <span>&#x2295;</span> Scroll to zoom &nbsp;&middot;&nbsp;
+            <span>&#x25C9;</span> Hover for details &nbsp;&middot;&nbsp;
+            Auto-rotates after 3s idle
+          </div>
+          <div class='qc3d-legend' id='qc3d-legend'></div>
+        </div>
+      </div>
+    </section>
+
+    <div class='divider'></div>
+
+    <section id='quantclaw'>
+      <div class='section-tag'>QuantClaw</div>
+      <h2>Introducing QuantClaw</h2>
+
+      <div class='router-hero'>
+        <div class='media-card quantclaw-overview'>
+          <div class='card-label'>Overview</div>
+          <img src='./figs/overview.png' alt='QuantClaw overview' />
+        </div>
+        <div class='content-card no-frame'>
+          <p>
+            QuantClaw is a plug-and-play task-type routing quantization plugin designed for OpenClaw. It enables model precision switching based on task type for user-submitted queries, striking an effective balance between quality, efficiency, and cost. QuantClaw features <strong>automatic adaptation</strong>, <strong>intelligent routing</strong>, <strong>full customizability</strong>, and <strong>built-in observability</strong>.
+          </p>
+        </div>
+      </div>
+
+      <div class='feature-grid'>
+        <div class='feature-card'>
+          <h3>Automatic Adaptation</h3>
+          <p>
+            Given a user query, QuantClaw automatically determines the most suitable routing path without requiring the user to manually choose precision. It currently supports ordered detectors, including <code>ruleDetector</code> and <code>loadModelDetector</code>. In a typical workflow, <code>ruleDetector</code> first attempts to classify the query using predefined keywords, patterns, and task-type descriptions. If no reliable match is found, <code>loadModelDetector</code> invokes a judge model to identify the most appropriate task type. This allows QuantClaw to adapt dynamically to both explicit and ambiguous user intents.
+          </p>
+          <div class='diagram-card diagram-scroll'>
+            <pre>[ User Query ]
+      |
+      v
+[ ruleDetector: keywords / patterns / task hints ] --> [ Rule matched? ] -- Yes --> [ taskType identified ] --> [ Route decision by task type + precision ]
+                                                                  |
+                                                                  No
+                                                                  v
+                                                [ loadModelDetector: judge model ] --> [ taskType identified ]</pre>
+          </div>
+        </div>
+
+        <div class='feature-card'>
+          <h3>Intelligent Routing</h3>
+          <p>
+            Based on previous <code>Tasks Sensitivity Analysis</code>, QuantClaw maps each request to a predefined precision tier such as <code>4bit</code>, <code>8bit</code>, or <code>16bit</code>, and routes it to the corresponding bit-level model. This allows quantization-tolerant tasks to run on faster, more economical models, while reserving precision-critical tasks for higher-precision variants. By decoupling task understanding from model selection, QuantClaw makes routing decisions explainable, latency-aware, and cost-conscious.
+          </p>
+          <div class='feature-media'>
+            <img src='./figs/session.png' alt='QuantClaw intelligent routing session view' />
+          </div>
+        </div>
+
+        <div class='feature-card'>
+          <h3>Full Customizability</h3>
+          <p>
+            QuantClaw is designed to be fully configurable. Developers can define task types, detector order, keywords, regex patterns, precision mappings, model targets, fallback paths, and pricing policies according to their own workload requirements. This makes QuantClaw suitable for a wide range of deployment strategies, from low-cost everyday assistants to more advanced multi-model systems that require precise control over speed, quality, and budget.
+          </p>
+          <div class='feature-media'>
+            <img src='./figs/config.png' alt='QuantClaw configuration view' />
+          </div>
+        </div>
+
+        <div class='feature-card'>
+          <h3>Built-in Dashboard and Observability</h3>
+          <p>
+            QuantClaw includes a built-in dashboard for monitoring routing behavior, token usage, cost, and detection results in real time. It also supports live configuration and testing, making QuantClaw an observable and tunable routing layer within OpenClaw.
+          </p>
+          <div class='dashboard-card'>
+            <img src='./figs/dashboard.png' alt='QuantClaw dashboard' />
+          </div>
+        </div>
+      </div>
+
+      <h3 class="benefits-title">Benefits from QuantClaw</h3>
+      <p class="benefits-copy">
+        Since task sensitivity analysis is conducted on Claw-Eval using NVFP4 quantization, we also performed experiments on the PinchBench benchmark and INT4 data format to verify the generalizability of our findings. QuantClaw achieves up to 1.09× speedup and 21.7% cost savings on GLM-4.7-Flash, and 1.04× speedup and 6.3% cost savings on GLM-5, compared to the FP8/BF16 baselines, while maintaining or improving accuracy.
+      </p>
+      <div class="findings-wrap benefits-wrap">
+        <div class='bench-table-wrap'>
+          <table>
+            <thead>
+              <tr><th>Model</th><th>Approach</th><th>PinchBench (Best / Avg)</th><th class='benefit-cost-head'>Cost(usd) per task</th><th class='benefit-time-head'>Time(s) per task</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>GLM-4.7-Flash</td><td><span class='badge badge-blue'>All BF16</span></td><td>81.57 / 81.26</td><td class='benefit-cost'>0.001598</td><td class='benefit-time'>19.07</td></tr>
+              <tr><td></td><td><span class='badge badge-purple'>All INT4</span></td><td>82.63 / 78.71</td><td class='benefit-cost'>0.001422</td><td class='benefit-time'>21.80</td></tr>
+              <tr class='benefit-row-highlight'><td></td><td><span class='badge badge-green'>QuantClaw</span></td><td>84.11 / 85.46</td><td class='benefit-cost'>0.001252</td><td class='benefit-time'>17.47</td></tr>
+              <tr><td>GLM-5</td><td><span class='badge badge-blue'>All FP8</span></td><td>87.65 / 87.08</td><td class='benefit-cost'>0.0127</td><td class='benefit-time'>34.53</td></tr>
+              <tr><td></td><td><span class='badge badge-purple'>All INT4</span></td><td>90.10 / 88.24</td><td class='benefit-cost'>0.0105</td><td class='benefit-time'>32.19</td></tr>
+              <tr class='benefit-row-highlight'><td></td><td><span class='badge badge-green'>QuantClaw</span></td><td>90.09 / 89.09</td><td class='benefit-cost'>0.0119</td><td class='benefit-time'>33.21</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class='content-card' style='border:none; border-radius:0; box-shadow:none; padding-top:1rem;'><p><em>More results will be updated soon</em></p></div>
+      </div>
+
+      <div class='quote-card'>
+        <h3>The Bigger Picture</h3>
+        <blockquote>
+          The future of personal AI is not a single model running at maximum capacity all the time. It is a coordinated OpenClaw system where models of different strengths are dispatched intelligently according to the work that actually needs to be done.
+        </blockquote>
+        <p>
+          QuantClaw shows what OpenClaw can become when orchestration is treated as a first-class capability rather than an afterthought. The value of OpenClaw is not just that it can connect to many models, but that it can decide how those models should be used together. Most user requests do not need maximum capability, maximum cost, and maximum latency all at once. What they need is the right level of capability for the task. QuantClaw gives OpenClaw that decision layer: routing lightweight tasks to cheaper precision tiers, preserving stronger models for more demanding work, and making the entire system more efficient without increasing user complexity. In that sense, QuantClaw is not just a plugin for OpenClaw; it is a concrete example of how OpenClaw becomes a real multi-model operating system.
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      © 2026 QuantClaw · OpenClaw Quantization Research
+    </footer>
+  </div>
+
+  <script>
+    const nav = document.getElementById('siteNav');
+
+    function syncNavState() {
+      nav.classList.toggle('scrolled', window.scrollY > window.innerHeight * 0.72);
+    }
+
+    window.addEventListener('scroll', syncNavState, { passive: true });
+    syncNavState();
+
+    document.querySelectorAll('[data-switch]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        const groupName = button.dataset.switch;
+        const target = button.dataset.target;
+
+        document.querySelectorAll('[data-switch="' + groupName + '"]').forEach(function(item) {
+          const active = item === button;
+          item.classList.toggle('is-active', active);
+          item.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+
+        document.querySelectorAll('[data-panel="' + groupName + '"]').forEach(function(panel) {
+          panel.classList.toggle('is-active', panel.dataset.name === target);
+        });
+      });
+    });
+  </script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'></script>
+  <script>
+    (function () {
+      const wrap = document.getElementById('qc3d-wrap');
+      const tt = document.getElementById('qc3d-tt');
+      const legend = document.getElementById('qc3d-legend');
+      if (!wrap || !tt || !legend || !window.THREE) return;
+
+      const DATA = {
+        coding:        { score: 12.27, speed: 13.58, Cost: -30.58 },
+        communication: { score: -0.48, speed: -14.30, Cost: 19.22 },
+        compliance:    { score: 8.73, speed: 7.32, Cost: -0.68 },
+        comprehension: { score: -4.02, speed: 7.69, Cost: -0.56 },
+        content:       { score: 0.83, speed: -5.08, Cost: 19.22 },
+        data_analysis: { score: -10.06, speed: 0.75, Cost: 13.59 },
+        file_ops:      { score: 1.34, speed: 9.96, Cost: 20.66 },
+        finance:       { score: 1.17, speed: 6.79, Cost: 13.89 },
+        knowledge:     { score: -6.29, speed: -0.01, Cost: 15.29 },
+        memory:        { score: 0.00, speed: 33.86, Cost: 15.70 },
+        multimodal:    { score: -2.71, speed: 46.88, Cost: -1.92 },
+        office_qa:     { score: -6.84, speed: -4.41, Cost: 25.77 },
+        operations:    { score: 2.67, speed: -3.07, Cost: 17.83 },
+        ops:           { score: 0.50, speed: -1.26, Cost: 13.23 },
+        organization:  { score: 3.57, speed: 1.42, Cost: 24.82 },
+        procurement:   { score: 0.73, speed: -12.13, Cost: -2.46 },
+        productivity:  { score: 0.63, speed: 2.62, Cost: 25.40 },
+        research:      { score: -2.64, speed: -26.09, Cost: 3.87 },
+        rewriting:     { score: 1.37, speed: 0.32, Cost: 24.97 },
+        safety:        { score: 6.50, speed: -9.12, Cost: 17.94 },
+        security:      { score: 2.42, speed: -17.38, Cost: 5.79 },
+        synthesis:     { score: 6.39, speed: -4.88, Cost: 11.82 },
+        terminal:      { score: 6.69, speed: 16.66, Cost: 30.56 },
+        workflow:      { score: 6.15, speed: -13.64, Cost: 7.55 }
+      };
+
+      const PALETTE = [
+        '#89b7eb','#dd8486','#6ab69c','#e1ac76','#4b5765',
+        '#a1d2e0','#c4a0d0','#b8c97a','#d4a0a0','#7ab0c8',
+        '#c8b468','#8dbba0','#c09078','#a0b8d8','#d6a8c0',
+        '#78a8a0','#b0a0c8','#d0c090','#98b4b0','#c88888',
+        '#88c0a8','#b0a888','#a0c8d8','#e0b090'
+      ];
+
+      const tasks = Object.keys(DATA);
+      const taskConfig = {};
+      tasks.forEach((t, i) => {
+        taskConfig[t] = { color: PALETTE[i % PALETTE.length], fontSize: 13 };
+      });
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setClearColor(0xf6f8fc, 1);
+      renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+      wrap.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.Fog(0xf6f8fc, 6, 18);
+      const camera = new THREE.PerspectiveCamera(44, wrap.clientWidth / wrap.clientHeight, 0.01, 100);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+      const sun = new THREE.DirectionalLight(0xffefe0, 0.62);
+      sun.position.set(4, 6, 3);
+      scene.add(sun);
+      const fill = new THREE.DirectionalLight(0xe9f0ff, 0.34);
+      fill.position.set(-3, 2, -4);
+      scene.add(fill);
+
+      function getRange(key) {
+        const vals = tasks.map((t) => DATA[t][key]);
+        return [Math.min.apply(null, vals), Math.max.apply(null, vals)];
+      }
+      function norm(val, min, max) {
+        return max === min ? 0.5 : (val - min) / (max - min);
+      }
+
+      const axG = new THREE.Group();
+      const L = 1.1;
+      const axDefs = [
+        { dir: [1,0,0], hex: 0x3b82f6 },
+        { dir: [0,1,0], hex: 0xf97316 },
+        { dir: [0,0,1], hex: 0x8b5cf6 }
+      ];
+      axDefs.forEach(({ dir, hex }) => {
+        axG.add(new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(dir[0] * L, dir[1] * L, dir[2] * L)]),
+          new THREE.LineBasicMaterial({ color: hex })
+        ));
+        const cone = new THREE.Mesh(new THREE.ConeGeometry(0.022, 0.07, 10), new THREE.MeshBasicMaterial({ color: hex }));
+        cone.position.set(dir[0] * (L + 0.038), dir[1] * (L + 0.038), dir[2] * (L + 0.038));
+        if (dir[0]) cone.rotation.z = -Math.PI / 2;
+        if (dir[2]) cone.rotation.x = Math.PI / 2;
+        axG.add(cone);
+      });
+      const gF = new THREE.LineBasicMaterial({ color: 0xd8dee8, transparent: true, opacity: 0.46 });
+      const gW = new THREE.LineBasicMaterial({ color: 0xe8def8, transparent: true, opacity: 0.22 });
+      for (let i = 0; i <= 4; i++) {
+        const t = i / 4;
+        axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,t), new THREE.Vector3(1,0,t)]), gF));
+        axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(t,0,0), new THREE.Vector3(t,0,1)]), gF));
+        axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,t,0), new THREE.Vector3(1,t,0)]), gW));
+        axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(t,0,0), new THREE.Vector3(t,1,0)]), gW));
+      }
+
+      function makeLabel(txt, cssColor) {
+        const cv = document.createElement('canvas');
+        cv.width = 420; cv.height = 72;
+        const cx = cv.getContext('2d');
+        cx.fillStyle = 'rgba(255,255,255,.85)';
+        cx.beginPath();
+        if (cx.roundRect) cx.roundRect(3,3,414,66,10); else cx.rect(3,3,414,66);
+        cx.fill();
+        cx.fillStyle = cssColor;
+        cx.font = 'bold 28px IBM Plex Mono, monospace';
+        cx.textAlign = 'center';
+        cx.textBaseline = 'middle';
+        cx.fillText(txt, 210, 38);
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthTest: false }));
+        sp.scale.set(0.54, 0.10, 1);
+        return sp;
+      }
+      function makeTick(txt, cssColor) {
+        const cv = document.createElement('canvas');
+        cv.width = 130; cv.height = 38;
+        const cx = cv.getContext('2d');
+        cx.fillStyle = cssColor;
+        cx.font = '600 22px IBM Plex Mono, monospace';
+        cx.textAlign = 'center';
+        cx.textBaseline = 'middle';
+        cx.fillText(txt, 65, 19);
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthTest: false }));
+        sp.scale.set(0.16, 0.05, 1);
+        return sp;
+      }
+      function fmtTick(val, range) {
+        return (range[0] + val * (range[1] - range[0])).toFixed(0) + '%';
+      }
+
+      const lX = makeLabel('SPEED GAIN (%)', '#3b82f6'); lX.position.set(L + 0.22, 0, 0); axG.add(lX);
+      const lY = makeLabel('SCORE GAIN (%)', '#f97316'); lY.position.set(0, L + 0.16, 0); axG.add(lY);
+      const lZ = makeLabel('COST GAIN (%)', '#8b5cf6'); lZ.position.set(0, 0, L + 0.22); axG.add(lZ);
+      axG.position.set(-0.5, -0.5, -0.5);
+      scene.add(axG);
+
+      let meshes = [];
+      let dynamicObjects = [];
+      function rebuildScene() {
+        dynamicObjects.forEach((o) => scene.remove(o));
+        dynamicObjects = [];
+        meshes = [];
+        const ranges = { speed: getRange('speed'), Cost: getRange('Cost'), score: getRange('score') };
+        const oldTicks = scene.getObjectByName('tickGroup');
+        if (oldTicks) scene.remove(oldTicks);
+        const tickG = new THREE.Group();
+        tickG.name = 'tickGroup';
+        tickG.position.set(-0.5, -0.5, -0.5);
+        [0,0.25,0.5,0.75,1].forEach((t) => {
+          const tx = makeTick(fmtTick(t, ranges.speed), '#3b82f6'); tx.position.set(t, -0.07, -0.07); tickG.add(tx);
+          const tz = makeTick(fmtTick(t, ranges.Cost), '#8b5cf6'); tz.position.set(-0.13, -0.07, t); tickG.add(tz);
+        });
+        [-10,-5,0,5,10].forEach((v) => {
+          if (v < ranges.score[0] || v > ranges.score[1]) return;
+          const pos = norm(v, ranges.score[0], ranges.score[1]);
+          const ty = makeTick(v + '%', '#f97316'); ty.position.set(-0.13, pos, -0.05); tickG.add(ty);
+        });
+        scene.add(tickG);
+
+        const SG = new THREE.SphereGeometry(0.034, 24, 24);
+        tasks.forEach((task) => {
+          const d = DATA[task];
+          const cfg = taskConfig[task];
+          const col = new THREE.Color(cfg.color);
+          const mesh = new THREE.Mesh(SG, new THREE.MeshPhongMaterial({
+            color: col, emissive: col, emissiveIntensity: 0.08, shininess: 120, specular: new THREE.Color(0xffffff)
+          }));
+          const nx = norm(d.speed, ranges.speed[0], ranges.speed[1]);
+          const ny = norm(d.score, ranges.score[0], ranges.score[1]);
+          const nz = norm(d.Cost, ranges.Cost[0], ranges.Cost[1]);
+          mesh.position.set(nx - 0.5, ny - 0.5, nz - 0.5);
+          mesh.userData = { task, d, cfg };
+
+          const fs = cfg.fontSize;
+          const cv = document.createElement('canvas');
+          const c2 = cv.getContext('2d');
+          c2.font = '500 ' + fs + 'px IBM Plex Mono, monospace';
+          const tw = c2.measureText(task).width;
+          cv.width = tw + 12; cv.height = fs + 8;
+          c2.font = '500 ' + fs + 'px IBM Plex Mono, monospace';
+          c2.fillStyle = 'rgba(255,255,255,.7)';
+          c2.beginPath();
+          if (c2.roundRect) c2.roundRect(1,1,tw+10,fs+6,3); else c2.rect(1,1,tw+10,fs+6);
+          c2.fill();
+          c2.fillStyle = '#3a3a3a';
+          c2.textAlign = 'left';
+          c2.textBaseline = 'middle';
+          c2.fillText(task, 6, (fs + 8) / 2);
+
+          const lbl = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthTest: false }));
+          const scale = (fs / 13) * 0.38;
+          lbl.scale.set((tw + 12) / 260 * scale, 0.026 * (fs / 13), 1);
+          lbl.position.set(nx - 0.5 + 0.045, ny - 0.5 + 0.042, nz - 0.5);
+
+          scene.add(mesh); scene.add(lbl);
+          dynamicObjects.push(mesh, lbl);
+          mesh.userData.lbl = lbl;
+          meshes.push(mesh);
+        });
+
+        legend.innerHTML = '';
+        tasks.forEach((t) => {
+          legend.innerHTML += "<div class='qc3d-leg-item'><span class='qc3d-leg-dot' style='background:" + taskConfig[t].color + "'></span>" + t + "</div>";
+        });
+      }
+
+      let theta = 0.75, phi = 1.05, rad = 2.8, drag = false, prev = { x: 0, y: 0 }, autoRot = true, idleTm = null, touchDist = 0;
+      function camUp() {
+        camera.position.set(rad * Math.sin(phi) * Math.sin(theta), rad * Math.cos(phi), rad * Math.sin(phi) * Math.cos(theta));
+        camera.lookAt(0,0,0);
+      }
+      camUp();
+      renderer.domElement.addEventListener('mousedown', (e) => { drag = true; prev = { x: e.clientX, y: e.clientY }; autoRot = false; clearTimeout(idleTm); });
+      window.addEventListener('mouseup', () => { drag = false; idleTm = setTimeout(() => { autoRot = true; }, 3500); });
+      window.addEventListener('mousemove', (e) => { if (!drag) return; theta -= (e.clientX - prev.x) * .007; phi = Math.max(.15, Math.min(Math.PI - .15, phi + (e.clientY - prev.y) * .007)); prev = { x: e.clientX, y: e.clientY }; camUp(); });
+      renderer.domElement.addEventListener('wheel', (e) => { rad = Math.max(1.5, Math.min(5.5, rad + e.deltaY * .005)); camUp(); e.preventDefault(); }, { passive: false });
+      renderer.domElement.addEventListener('touchstart', (e) => { if (e.touches.length === 1) { drag = true; prev = { x: e.touches[0].clientX, y: e.touches[0].clientY }; autoRot = false; clearTimeout(idleTm); } else if (e.touches.length === 2) { touchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); } }, { passive: false });
+      renderer.domElement.addEventListener('touchmove', (e) => { e.preventDefault(); if (e.touches.length === 1 && drag) { theta -= (e.touches[0].clientX - prev.x) * .007; phi = Math.max(.15, Math.min(Math.PI - .15, phi + (e.touches[0].clientY - prev.y) * .007)); prev = { x: e.touches[0].clientX, y: e.touches[0].clientY }; camUp(); } else if (e.touches.length === 2) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); rad = Math.max(1.5, Math.min(5.5, rad - (d - touchDist) * .01)); touchDist = d; camUp(); } }, { passive: false });
+      renderer.domElement.addEventListener('touchend', () => { drag = false; idleTm = setTimeout(() => { autoRot = true; }, 3500); });
+
+      const ray = new THREE.Raycaster();
+      const msv = new THREE.Vector2();
+      renderer.domElement.addEventListener('mousemove', (e) => {
+        const r = renderer.domElement.getBoundingClientRect();
+        msv.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+        ray.setFromCamera(msv, camera);
+        const hits = ray.intersectObjects(meshes);
+        if (hits.length) {
+          const ud = hits[0].object.userData;
+          tt.classList.add('show');
+          tt.style.left = (e.clientX - r.left + 14) + 'px';
+          tt.style.top = (e.clientY - r.top - 10) + 'px';
+          const sC = ud.d.score >= 0 ? '#4a9a5a' : '#c05050';
+          tt.innerHTML = "<div class='qc3d-tt-name' style='color:" + ud.cfg.color + "'>" + ud.task + "</div>" +
+            "<div class='qc3d-tt-row'><span>Score</span><strong style='color:" + sC + "'>" + (ud.d.score >= 0 ? '+' : '') + ud.d.score.toFixed(2) + "%</strong></div>" +
+            "<div class='qc3d-tt-row'><span>Speed</span><strong>" + (ud.d.speed >= 0 ? '+' : '') + ud.d.speed.toFixed(2) + "%</strong></div>" +
+            "<div class='qc3d-tt-row'><span>Cost</span><strong>" + (ud.d.Cost >= 0 ? '+' : '') + ud.d.Cost.toFixed(2) + "%</strong></div>";
+        } else {
+          tt.classList.remove('show');
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        if (!wrap.clientWidth) return;
+        camera.aspect = wrap.clientWidth / wrap.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+      });
+
+      (function loop() {
+        requestAnimationFrame(loop);
+        if (autoRot) { theta += .003; camUp(); }
+        renderer.render(scene, camera);
+      })();
+
+      rebuildScene();
+    })();
+  </script>
+  <!-- Lightbox overlay -->
+  <div class='lightbox-overlay' id='lightbox'>
+    <img id='lightbox-img' src='' alt='Enlarged view' />
+  </div>
+
+  <script>
+    // Lightbox: make feature-media / dashboard-card / image-panel images zoomable
+    (function () {
+      const overlay = document.getElementById('lightbox');
+      const lbImg = document.getElementById('lightbox-img');
+      if (!overlay || !lbImg) return;
+
+      document.querySelectorAll('.feature-media img, .dashboard-card img, .image-panel img').forEach(function (img) {
+        img.classList.add('zoomable');
+        img.addEventListener('click', function () {
+          lbImg.src = img.src;
+          lbImg.alt = img.alt || 'Enlarged view';
+          overlay.classList.add('is-open');
+        });
+      });
+
+      overlay.addEventListener('click', function () {
+        overlay.classList.remove('is-open');
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') overlay.classList.remove('is-open');
+      });
+    })();
+  </script>
+
+  <script>
+    // Enhance percentage cells with inline color bars
+    (function () {
+      var MAX_ABS = 15; // cap for bar width scaling
+
+      function enhanceCell(td) {
+        var raw = td.textContent.trim();
+        var match = raw.match(/^([+-]?)(\d+(?:\.\d+)?)%$/);
+        if (!match) return;
+        var sign = match[1];
+        var num = parseFloat(match[2]);
+        var val = sign === '-' ? -num : num;
+        var pct = Math.min(Math.abs(val) / MAX_ABS * 100, 100);
+        var cls = val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral';
+        var label = (val > 0 ? '+' : '') + val.toFixed(2) + '%';
+
+        td.innerHTML =
+          "<div class='score-bar-cell'>" +
+            "<span class='score-val " + cls + "'>" + label + "</span>" +
+            "<div class='score-bar-track'><div class='score-bar-fill " + cls + "' style='width:" + pct + "%'></div></div>" +
+          "</div>";
+      }
+
+      // Sensitivity tables: 2-column tables (Task Category | Score Gain)
+      document.querySelectorAll('[data-panel="sensitivity"] table').forEach(function (table) {
+        table.querySelectorAll('tbody tr').forEach(function (tr) {
+          var tds = tr.querySelectorAll('td');
+          if (tds.length >= 2) enhanceCell(tds[tds.length - 1]);
+        });
+      });
+
+      // Routing tables: 5-column tables (Rank | Task | Precision | Delta1 | Delta2)
+      document.querySelectorAll('.tradeoff-panel table').forEach(function (table) {
+        table.querySelectorAll('tbody tr').forEach(function (tr) {
+          var tds = tr.querySelectorAll('td');
+          if (tds.length >= 5) {
+            // Rank column styling
+            tds[0].classList.add('rank-cell');
+            // Last two delta columns
+            enhanceCell(tds[3]);
+            enhanceCell(tds[4]);
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
