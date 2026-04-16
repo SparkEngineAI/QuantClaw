@@ -294,6 +294,25 @@
       box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
     }
 
+    .hero-demo {
+      max-width: 980px;
+      margin: 2rem auto 0;
+      text-align: left;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .hero-demo video {
+      width: 100%;
+      display: block;
+      border: none;
+      background: transparent;
+      border-radius: 14px;
+      box-shadow: none;
+    }
+
     .stat-item {
       padding: 1.7rem 1.25rem;
       border-right: 1px solid var(--border);
@@ -318,6 +337,13 @@
 
     .stat-num.blue {
       background: linear-gradient(135deg, #60a5fa, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-num.teal {
+      background: linear-gradient(135deg, var(--blue-glow), var(--orange-bright));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -805,7 +831,7 @@
       padding: 0.2rem 0.7rem;
       border-radius: 999px;
       font-size: 0.75rem;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .badge-green { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
@@ -1468,14 +1494,18 @@
       </div>
       <div class='stats-bar'>
         <div class='stat-item'><div class='stat-num blue'>24</div><div class='stat-label'>Task Types</div></div>
-        <div class='stat-item'><div class='stat-num'>104</div><div class='stat-label'>Tasks</div></div>
+        <div class='stat-item'><div class='stat-num'>9B-744B</div><div class='stat-label'>Model Scale</div></div>
         <div class='stat-item'><div class='stat-num orange'>20%</div><div class='stat-label'>Cost Cut</div></div>
         <div class='stat-item'><div class='stat-num blue'>10%</div><div class='stat-label'>Speed Up</div></div>
+      </div>
+      <div class='hero-demo'>
+        <img src='./figs/overview.png' alt='QuantClaw overview' />
       </div>
     </div>
   </header>
 
   <div class='light-body'>
+
     <section id='background'>
       <div class='section-tag'>Background</div>
       <h2>Why Quantization Matters for OpenClaw</h2>
@@ -1494,11 +1524,6 @@
             <p>(3) How much cost can we actually save and how much speedup can we achieve in practice through quantization?</p>
           </div>
         </div>
-      </div>
-
-      <div class='full-width-card'>
-        <h3>Demo</h3>
-        <video src='./QuantClaw_demo.mp4' controls preload='none' playsinline poster='./figs/demo_poster.png'></video>
       </div>
     </section>
 
@@ -1671,30 +1696,30 @@
                   <tr><th>Rank</th><th>Task Category</th><th>Preferred Precision</th><th>Speed Δ (BF16-NVFP4)</th><th>Score Δ (BF16-NVFP4)</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+13.58%</td><td>+12.27%</td></tr>
-                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+7.32%</td><td>+8.73%</td></tr>
-                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+16.66%</td><td>+6.69%</td></tr>
-                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-9.12%</td><td>+6.50%</td></tr>
-                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-4.88%</td><td>+6.39%</td></tr>
-                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-13.64%</td><td>+6.15%</td></tr>
-                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+1.42%</td><td>+3.57%</td></tr>
-                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-3.07%</td><td>+2.67%</td></tr>
-                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-17.38%</td><td>+2.42%</td></tr>
-                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+0.32%</td><td>+1.37%</td></tr>
-                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+9.96%</td><td>+1.34%</td></tr>
-                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+6.79%</td><td>+1.17%</td></tr>
-                  <tr><td>13</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-5.08%</td><td>+0.83%</td></tr>
-                  <tr><td>14</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-12.13%</td><td>+0.73%</td></tr>
-                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+2.62%</td><td>+0.63%</td></tr>
-                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-1.26%</td><td>+0.50%</td></tr>
-                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+33.86%</td><td>0.00%</td></tr>
-                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-14.30%</td><td>-0.48%</td></tr>
-                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-26.09%</td><td>-2.64%</td></tr>
-                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+46.88%</td><td>-2.71%</td></tr>
-                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+7.69%</td><td>-4.02%</td></tr>
-                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-0.01%</td><td>-6.29%</td></tr>
-                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-4.41%</td><td>-6.84%</td></tr>
-                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+0.75%</td><td>-10.06%</td></tr>
+                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+13.58%</td><td>+12.27%</td></tr>
+                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+7.32%</td><td>+8.73%</td></tr>
+                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+16.66%</td><td>+6.69%</td></tr>
+                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-9.12%</td><td>+6.50%</td></tr>
+                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-4.88%</td><td>+6.39%</td></tr>
+                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-13.64%</td><td>+6.15%</td></tr>
+                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+1.42%</td><td>+3.57%</td></tr>
+                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-3.07%</td><td>+2.67%</td></tr>
+                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-17.38%</td><td>+2.42%</td></tr>
+                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+0.32%</td><td>+1.37%</td></tr>
+                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+9.96%</td><td>+1.34%</td></tr>
+                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+6.79%</td><td>+1.17%</td></tr>
+                  <tr><td>13</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-5.08%</td><td>+0.83%</td></tr>
+                  <tr><td>14</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-12.13%</td><td>+0.73%</td></tr>
+                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+2.62%</td><td>+0.63%</td></tr>
+                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-1.26%</td><td>+0.50%</td></tr>
+                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+33.86%</td><td>0.00%</td></tr>
+                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-14.30%</td><td>-0.48%</td></tr>
+                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-26.09%</td><td>-2.64%</td></tr>
+                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+46.88%</td><td>-2.71%</td></tr>
+                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+7.69%</td><td>-4.02%</td></tr>
+                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-0.01%</td><td>-6.29%</td></tr>
+                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-4.41%</td><td>-6.84%</td></tr>
+                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+0.75%</td><td>-10.06%</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1714,30 +1739,30 @@
                   <tr><th>Rank</th><th>Task Category</th><th>Preferred Precision</th><th>Cost Δ (BF16-NVFP4)</th><th>Score Δ (BF16-NVFP4)</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-30.58%</td><td>+12.27%</td></tr>
-                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-0.68%</td><td>+8.73%</td></tr>
-                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+30.56%</td><td>+6.69%</td></tr>
-                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+17.94%</td><td>+6.50%</td></tr>
-                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+11.82%</td><td>+6.39%</td></tr>
-                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+7.55%</td><td>+6.15%</td></tr>
-                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+24.82%</td><td>+3.57%</td></tr>
-                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+17.83%</td><td>+2.67%</td></tr>
-                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+5.79%</td><td>+2.42%</td></tr>
-                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+24.97%</td><td>+1.37%</td></tr>
-                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+20.66%</td><td>+1.34%</td></tr>
-                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>+13.89%</td><td>+1.17%</td></tr>
-                  <tr><td>13</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>BF16/FP8</span></td><td>-2.46%</td><td>+0.73%</td></tr>
-                  <tr><td>14</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+19.22%</td><td>+0.83%</td></tr>
-                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+25.40%</td><td>+0.63%</td></tr>
-                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+13.23%</td><td>+0.50%</td></tr>
-                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+15.70%</td><td>0.00%</td></tr>
-                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+19.22%</td><td>-0.48%</td></tr>
-                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+3.87%</td><td>-2.64%</td></tr>
-                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-1.92%</td><td>-2.71%</td></tr>
-                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>-0.56%</td><td>-2.71%</td></tr>
-                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+15.29%</td><td>-6.29%</td></tr>
-                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+25.77%</td><td>-6.84%</td></tr>
-                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>NVFP4</span></td><td>+13.59%</td><td>-10.06%</td></tr>
+                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-30.58%</td><td>+12.27%</td></tr>
+                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-0.68%</td><td>+8.73%</td></tr>
+                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+30.56%</td><td>+6.69%</td></tr>
+                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+17.94%</td><td>+6.50%</td></tr>
+                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+11.82%</td><td>+6.39%</td></tr>
+                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+7.55%</td><td>+6.15%</td></tr>
+                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+24.82%</td><td>+3.57%</td></tr>
+                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+17.83%</td><td>+2.67%</td></tr>
+                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+5.79%</td><td>+2.42%</td></tr>
+                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+24.97%</td><td>+1.37%</td></tr>
+                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+20.66%</td><td>+1.34%</td></tr>
+                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+13.89%</td><td>+1.17%</td></tr>
+                  <tr><td>13</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-2.46%</td><td>+0.73%</td></tr>
+                  <tr><td>14</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+19.22%</td><td>+0.83%</td></tr>
+                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+25.40%</td><td>+0.63%</td></tr>
+                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+13.23%</td><td>+0.50%</td></tr>
+                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+15.70%</td><td>0.00%</td></tr>
+                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+19.22%</td><td>-0.48%</td></tr>
+                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+3.87%</td><td>-2.64%</td></tr>
+                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-1.92%</td><td>-2.71%</td></tr>
+                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-0.56%</td><td>-2.71%</td></tr>
+                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+15.29%</td><td>-6.29%</td></tr>
+                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+25.77%</td><td>-6.84%</td></tr>
+                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+13.59%</td><td>-10.06%</td></tr>
                 </tbody>
               </table>
             </div>
