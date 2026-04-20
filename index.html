@@ -5,6 +5,8 @@
   <meta charset='UTF-8' />
   <meta name='viewport' content='width=device-width, initial-scale=1.0' />
   <title>QuantClaw: Precision Where It Matters for OpenClaw</title>
+  <link rel='icon' type='image/png' sizes='512x512' href='./figs/favicon.png' />
+  <link rel='apple-touch-icon' href='./figs/favicon.png' />
   <style>
     :root {
       --bg-deep: #050d1a;
@@ -123,6 +125,43 @@
       border-radius: 999px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+    }
+
+    .nav-tools {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.24rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 0.42rem 0.82rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    .lang-btn.is-active {
+      background: linear-gradient(135deg, #eff6ff, #fff7ed);
+      color: var(--text-heading);
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
     }
 
     .hero {
@@ -445,10 +484,10 @@
 
     .media-card img,
     .media-card video {
+      display: block;
       width: 100%;
+      height: auto;
       border-radius: 14px;
-      border: 1px solid var(--border);
-      background: #ffffff;
     }
 
     .card-label {
@@ -975,6 +1014,13 @@
 
     .diagram-card { padding: 1.25rem; }
     .diagram-card pre { font-size: 0.82rem; line-height: 1.7; color: var(--text-body); }
+    .diagram-card img { width: 100%; display: block; }
+    .diagram-card.no-frame {
+      border: none;
+      background: transparent;
+      border-radius: 0;
+      padding: 0;
+    }
 
     /* Lightbox */
     .lightbox-overlay {
@@ -1476,7 +1522,13 @@
       <a href='#routing-policy'>Routing Policy</a>
       <a href='#quantclaw'>QuantClaw</a>
     </div>
-    <div class='nav-badge'>Research Blog</div>
+    <div class='nav-tools'>
+      <div class='lang-toggle' role='group' aria-label='Language switch'>
+        <button class='lang-btn is-active' type='button' data-lang='en'>EN</button>
+        <button class='lang-btn' type='button' data-lang='zh'>中文</button>
+      </div>
+      <div class='nav-badge'>Research Blog</div>
+    </div>
   </nav>
 
   <header class='hero'>
@@ -1485,7 +1537,7 @@
       <div class='hero-tag'>OpenClaw Quantization Research</div>
       <h1><span class='word-quant'>Quant</span><span class='word-claw'>Claw</span>: Precision Where It Matters for OpenClaw</h1>
       <p class='hero-sub'>
-        Not every query needs a supercomputer. We benchmarked model quantization across OpenClaw's full task spectrum and developed a router plugin that sends each query exactly where it belongs. Cut costs by 20%, speed up 10% without sacrificing capabilities.
+        Not every query needs a supercomputer. We benchmarked model quantization across OpenClaw's full task spectrum and developed a router plugin that sends each query exactly where it belongs. Cut costs by ~20%, speed up ~10% without sacrificing capabilities.
       </p>
       <div class='hero-actions'>
         <a class='btn-primary' href='#quantclaw'>Explore QuantClaw →</a>
@@ -1510,13 +1562,13 @@
       <div class='section-tag'>Background</div>
       <h2>Why Quantization Matters for OpenClaw</h2>
       <p class='lead'>
-        OpenClaw has emerged as one of the hottest open-source AI assistant projects of 2026. By combining large language models with browser control, Shell execution, memory, and automation tools, it turns the AI assistant from a chatbot into an agent that can actually do things. That combination of autonomy and usability is exactly why OpenClaw has attracted so much attention: it promises not just to answer questions, but to complete real workflows on the user’s behalf.
+        OpenClaw has become one of the hottest open-source AI assistant projects of 2026. By combining large language models with browser control, Shell execution, memory, and automation tools, it transforms an AI assistant from a chatbot into an agent that can complete real workflows on the user’s behalf.
       </p>
 
       <div class='intro-grid'>
         <div class='content-card'>
           <p><strong>However, this capability comes at a steep token cost.</strong> Even a seemingly simple query can trigger far more than a single response, as OpenClaw often has to carry long system prompts, conversation history, tool outputs, and multi-step reasoning into each API call. In practice, users are paying not only for the answer itself, but for the overhead of running a full agent system.</p>
-          <p><strong>Model quantization can make models cheaper and faster to run.</strong> By reducing numerical precision from 32-bit floats down to 4-bits or even 2-bits, quantization can dramatically shrink memory footprint and compute. However, the effect of quantization on agentic tasks is unclear. This motivates us to explore the following questions:</p>
+          <p><strong>Model quantization can make models cheaper and faster to run.</strong> By reducing numerical precision from 32-bit floats down to 4-bit or even 2-bit, quantization can dramatically shrink memory footprint and compute. However, its effect on agentic tasks remains unclear, motivating the following questions:</p>
           <div class='question-list'>
             <div class='card-label'>Research Questions</div>
             <p>(1) How does quantization affect OpenClaw overall?</p>
@@ -1582,13 +1634,14 @@
         </div>
 
         <p class='switch-intro'>Based on the experimental results, we divide different task types into three levels: 🔴 High Sensitivity, 🟢 Low Sensitivity and 🟡 Moderate Sensitivity.</p>
+        <p class='section-note sensitivity-note'>Score Gain is computed as (BF16 - NVFP4) / BF16.</p>
 
         <div class='switch-panel is-active' data-panel='sensitivity' data-name='high'>
           <p class='switch-intro'>These tasks suffer significant performance degradation with quantization, requiring BF16/FP8 precision for reliable execution:</p>
           <div class='table-card no-frame'>
             <div class='table-wrap'>
               <table>
-                <thead><tr><th>Task Category</th><th>Score Gain (BF16/FP8-NVFP4)</th></tr></thead>
+                <thead><tr><th>Task Category</th><th>Score Gain</th></tr></thead>
                 <tbody>
                   <tr><td><span class='task-type-label'>💻 Coding</span></td><td>+12.27%</td></tr>
                   <tr><td><span class='task-type-label'>📋 Compliance</span></td><td>+8.73%</td></tr>
@@ -1613,7 +1666,7 @@
           <div class='table-card no-frame'>
             <div class='table-wrap'>
               <table>
-                <thead><tr><th>Task Category</th><th>Score Gain (BF16/FP8-NVFP4)</th></tr></thead>
+                <thead><tr><th>Task Category</th><th>Score Gain</th></tr></thead>
                 <tbody>
                   <tr><td><span class='task-type-label'>🔬 Research</span></td><td>-2.64%</td></tr>
                   <tr><td><span class='task-type-label'>🖼️ Multimodal</span></td><td>-2.71%</td></tr>
@@ -1635,7 +1688,7 @@
           <div class='table-card no-frame'>
             <div class='table-wrap'>
               <table>
-                <thead><tr><th>Task Category</th><th>Score Gain (BF16/FP8-NVFP4)</th></tr></thead>
+                <thead><tr><th>Task Category</th><th>Score Gain</th></tr></thead>
                 <tbody>
                   <tr><td><span class='task-type-label'>✍️ Rewriting</span></td><td>+1.37%</td></tr>
                   <tr><td><span class='task-type-label'>📁 File_ops</span></td><td>+1.34%</td></tr>
@@ -1669,7 +1722,7 @@
         </p>
         <ol class='numbered-points'>
           <li><strong>Score vs. Speed (Faster)</strong>: Minimize inference latency without quality degradation - prioritize tasks where latency reduction outweighs marginal score changes</li>
-          <li><strong>Score vs. Cost (Cheaper)</strong>: Minimize inference spend at parity - target tasks where quality holds steady or improves as precision drops</li>
+          <li><strong>Score vs. Cost (Cheaper)</strong>: Minimize inference spend at parity - target tasks where quality holds steady or improves as cost drops</li>
           <li><strong>Score vs. Cost vs. Speed</strong>: Optimize all three simultaneously - identify tasks where faster, cheaper inference also yields better outputs</li>
         </ol>
       </div>
@@ -1683,6 +1736,7 @@
           </div>
         </div>
         <p class='section-note'>Click the tabs to switch views.</p>
+        <p class='section-note routing-metric-note'>Speed Δ = (BF16 Speed - NVFP4 Speed) / (BF16 Speed). Cost Δ = (BF16 Cost - NVFP4 Cost) / (BF16 Cost).</p>
 
         <div class='switch-panel tradeoff-panel is-active' data-panel='routing' data-name='speed'>
           <div class='findings-wrap'>
@@ -1693,33 +1747,33 @@
             <div class='bench-table-wrap'>
               <table>
                 <thead>
-                  <tr><th>Rank</th><th>Task Category</th><th>Preferred Precision</th><th>Speed Δ (BF16-NVFP4)</th><th>Score Δ (BF16-NVFP4)</th></tr>
+                  <tr><th>Rank</th><th>Task Category</th><th>Preferred Precision</th><th>Speed Δ (BF16-NVFP4)</th><th>Score Gain</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+13.58%</td><td>+12.27%</td></tr>
-                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+7.32%</td><td>+8.73%</td></tr>
-                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+16.66%</td><td>+6.69%</td></tr>
-                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-9.12%</td><td>+6.50%</td></tr>
-                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-4.88%</td><td>+6.39%</td></tr>
-                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-13.64%</td><td>+6.15%</td></tr>
-                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+1.42%</td><td>+3.57%</td></tr>
-                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-3.07%</td><td>+2.67%</td></tr>
-                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-17.38%</td><td>+2.42%</td></tr>
-                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+0.32%</td><td>+1.37%</td></tr>
-                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+9.96%</td><td>+1.34%</td></tr>
-                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+6.79%</td><td>+1.17%</td></tr>
-                  <tr><td>13</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-5.08%</td><td>+0.83%</td></tr>
-                  <tr><td>14</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-12.13%</td><td>+0.73%</td></tr>
-                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+2.62%</td><td>+0.63%</td></tr>
-                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-1.26%</td><td>+0.50%</td></tr>
-                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+33.86%</td><td>0.00%</td></tr>
-                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-14.30%</td><td>-0.48%</td></tr>
-                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-26.09%</td><td>-2.64%</td></tr>
-                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+46.88%</td><td>-2.71%</td></tr>
-                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+7.69%</td><td>-4.02%</td></tr>
-                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-0.01%</td><td>-6.29%</td></tr>
-                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-4.41%</td><td>-6.84%</td></tr>
-                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+0.75%</td><td>-10.06%</td></tr>
+                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+13.58%</td><td>+12.27%</td></tr>
+                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+7.32%</td><td>+8.73%</td></tr>
+                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+16.66%</td><td>+6.69%</td></tr>
+                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-9.12%</td><td>+6.50%</td></tr>
+                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-4.88%</td><td>+6.39%</td></tr>
+                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-13.64%</td><td>+6.15%</td></tr>
+                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+1.42%</td><td>+3.57%</td></tr>
+                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-3.07%</td><td>+2.67%</td></tr>
+                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-17.38%</td><td>+2.42%</td></tr>
+                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+0.32%</td><td>+1.37%</td></tr>
+                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+9.96%</td><td>+1.34%</td></tr>
+                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+6.79%</td><td>+1.17%</td></tr>
+                  <tr><td>13</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-5.08%</td><td>+0.83%</td></tr>
+                  <tr><td>14</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-12.13%</td><td>+0.73%</td></tr>
+                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+2.62%</td><td>+0.63%</td></tr>
+                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-1.26%</td><td>+0.50%</td></tr>
+                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+33.86%</td><td>0.00%</td></tr>
+                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>-14.30%</td><td>-0.48%</td></tr>
+                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>-26.09%</td><td>-2.64%</td></tr>
+                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+46.88%</td><td>-2.71%</td></tr>
+                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+7.69%</td><td>-4.02%</td></tr>
+                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>-0.01%</td><td>-6.29%</td></tr>
+                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>-4.41%</td><td>-6.84%</td></tr>
+                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+0.75%</td><td>-10.06%</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1736,33 +1790,33 @@
             <div class='bench-table-wrap'>
               <table>
                 <thead>
-                  <tr><th>Rank</th><th>Task Category</th><th>Preferred Precision</th><th>Cost Δ (BF16-NVFP4)</th><th>Score Δ (BF16-NVFP4)</th></tr>
+                  <tr><th>Rank</th><th>Task Category</th><th>Preferred Precision</th><th>Cost Δ (BF16-NVFP4)</th><th>Score Gain</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-30.58%</td><td>+12.27%</td></tr>
-                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-0.68%</td><td>+8.73%</td></tr>
-                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+30.56%</td><td>+6.69%</td></tr>
-                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+17.94%</td><td>+6.50%</td></tr>
-                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+11.82%</td><td>+6.39%</td></tr>
-                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+7.55%</td><td>+6.15%</td></tr>
-                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+24.82%</td><td>+3.57%</td></tr>
-                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+17.83%</td><td>+2.67%</td></tr>
-                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+5.79%</td><td>+2.42%</td></tr>
-                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+24.97%</td><td>+1.37%</td></tr>
-                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+20.66%</td><td>+1.34%</td></tr>
-                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>+13.89%</td><td>+1.17%</td></tr>
-                  <tr><td>13</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>16/8 bit</span></td><td>-2.46%</td><td>+0.73%</td></tr>
-                  <tr><td>14</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+19.22%</td><td>+0.83%</td></tr>
-                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+25.40%</td><td>+0.63%</td></tr>
-                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+13.23%</td><td>+0.50%</td></tr>
-                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+15.70%</td><td>0.00%</td></tr>
-                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+19.22%</td><td>-0.48%</td></tr>
-                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+3.87%</td><td>-2.64%</td></tr>
-                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-1.92%</td><td>-2.71%</td></tr>
-                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>-0.56%</td><td>-2.71%</td></tr>
-                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+15.29%</td><td>-6.29%</td></tr>
-                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+25.77%</td><td>-6.84%</td></tr>
-                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>4 bit</span></td><td>+13.59%</td><td>-10.06%</td></tr>
+                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-30.58%</td><td>+12.27%</td></tr>
+                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-0.68%</td><td>+8.73%</td></tr>
+                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+30.56%</td><td>+6.69%</td></tr>
+                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+17.94%</td><td>+6.50%</td></tr>
+                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+11.82%</td><td>+6.39%</td></tr>
+                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+7.55%</td><td>+6.15%</td></tr>
+                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+24.82%</td><td>+3.57%</td></tr>
+                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+17.83%</td><td>+2.67%</td></tr>
+                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+5.79%</td><td>+2.42%</td></tr>
+                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+24.97%</td><td>+1.37%</td></tr>
+                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+20.66%</td><td>+1.34%</td></tr>
+                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+13.89%</td><td>+1.17%</td></tr>
+                  <tr><td>13</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-2.46%</td><td>+0.73%</td></tr>
+                  <tr><td>14</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+19.22%</td><td>+0.83%</td></tr>
+                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+25.40%</td><td>+0.63%</td></tr>
+                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+13.23%</td><td>+0.50%</td></tr>
+                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+15.70%</td><td>0.00%</td></tr>
+                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+19.22%</td><td>-0.48%</td></tr>
+                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+3.87%</td><td>-2.64%</td></tr>
+                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>-1.92%</td><td>-2.71%</td></tr>
+                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>-0.56%</td><td>-2.71%</td></tr>
+                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+15.29%</td><td>-6.29%</td></tr>
+                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+25.77%</td><td>-6.84%</td></tr>
+                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+13.59%</td><td>-10.06%</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1775,7 +1829,7 @@
         <h3>⚖️ Score vs Speed vs Cost</h3>
         <div class='qc3d-shell'>
           <div class='qc3d-head'>
-            <div class='qc3d-subtitle'>X: SPEED_GAIN &middot; Y (vertical): SCORE_GAIN &middot; Z: COST_GAIN</div>
+            <div class='qc3d-subtitle'>X: Speed Δ &middot; Y (vertical): SCORE_GAIN &middot; Z: Cost Δ</div>
           </div>
           <div class='qc3d-main-layout'>
             <div class='qc3d-chart-wrap' id='qc3d-wrap'>
@@ -1817,22 +1871,15 @@
           <p>
             Given a user query, QuantClaw automatically determines the most suitable routing path without requiring the user to manually choose precision. It currently supports ordered detectors, including <code>ruleDetector</code> and <code>loadModelDetector</code>. In a typical workflow, <code>ruleDetector</code> first attempts to classify the query using predefined keywords, patterns, and task-type descriptions. If no reliable match is found, <code>loadModelDetector</code> invokes a judge model to identify the most appropriate task type. This allows QuantClaw to adapt dynamically to both explicit and ambiguous user intents.
           </p>
-          <div class='diagram-card diagram-scroll'>
-            <pre>[ User Query ]
-      |
-      v
-[ ruleDetector: keywords / patterns / task hints ] --> [ Rule matched? ] -- Yes --> [ taskType identified ] --> [ Route decision by task type + precision ]
-                                                                  |
-                                                                  No
-                                                                  v
-                                                [ loadModelDetector: judge model ] --> [ taskType identified ]</pre>
+          <div class='diagram-card diagram-scroll no-frame'>
+            <img src='./figs/ruleDetector.png' alt='ruleDetector workflow diagram' />
           </div>
         </div>
 
         <div class='feature-card'>
           <h3>Intelligent Routing</h3>
           <p>
-            Based on previous <code>Tasks Sensitivity Analysis</code>, QuantClaw maps each request to a predefined precision tier such as <code>4bit</code>, <code>8bit</code>, or <code>16bit</code>, and routes it to the corresponding bit-level model. This allows quantization-tolerant tasks to run on faster, more economical models, while reserving precision-critical tasks for higher-precision variants. By decoupling task understanding from model selection, QuantClaw makes routing decisions explainable, latency-aware, and cost-conscious.
+            Based on previous <code>Tasks Sensitivity Analysis</code>, QuantClaw maps each request to a predefined precision tier such as 4-bit, 8-bit, or 16-bit, and routes it to the corresponding bit-level model. This allows quantization-tolerant tasks to run on faster, more economical models, while reserving precision-critical tasks for higher-precision variants. By decoupling task understanding from model selection, QuantClaw makes routing decisions explainable, latency-aware, and cost-conscious.
           </p>
           <div class='feature-media'>
             <img src='./figs/session.png' alt='QuantClaw intelligent routing session view' />
@@ -1886,10 +1933,10 @@
       <div class='quote-card'>
         <h3>The Bigger Picture</h3>
         <blockquote>
-          The future of personal AI is not a single model running at maximum capacity all the time. It is a coordinated OpenClaw system where models of different strengths are dispatched intelligently according to the work that actually needs to be done.
+          The future of personal AI assistants are not a single model running at maximum capacity all the time. It is a coordinated OpenClaw system where models of different strengths are dispatched intelligently according to the work that actually needs to be done.
         </blockquote>
         <p>
-          QuantClaw shows what OpenClaw can become when orchestration is treated as a first-class capability rather than an afterthought. The value of OpenClaw is not just that it can connect to many models, but that it can decide how those models should be used together. Most user requests do not need maximum capability, maximum cost, and maximum latency all at once. What they need is the right level of capability for the task. QuantClaw gives OpenClaw that decision layer: routing lightweight tasks to cheaper precision tiers, preserving stronger models for more demanding work, and making the entire system more efficient without increasing user complexity. In that sense, QuantClaw is not just a plugin for OpenClaw; it is a concrete example of how OpenClaw becomes a real multi-model operating system.
+          QuantClaw shows what OpenClaw can become when orchestration is treated as a first-class capability rather than an afterthought. The value of OpenClaw is not just that it can connect to many models, but that it can decide how those models should be used together. Most user requests do not need maximum capability, maximum cost, and maximum latency all at once. What they need is the right level of capability for the task. QuantClaw gives OpenClaw that decision layer: routing lightweight tasks to cheaper precision tiers, preserving stronger models for more demanding work, and making the entire system more efficient without increasing user complexity. In that sense, QuantClaw is not just a plugin for OpenClaw; it is a concrete example of how OpenClaw becomes a real multi-model collaborative system.
         </p>
       </div>
     </section>
@@ -1934,6 +1981,15 @@
       const tt = document.getElementById('qc3d-tt');
       const legend = document.getElementById('qc3d-legend');
       if (!wrap || !tt || !legend || !window.THREE) return;
+
+      function getTaskLabel(task) {
+        const labels = window.__quantclawTaskLabels || {};
+        return labels[task] || task;
+      }
+
+      function get3dUi() {
+        return window.__quantclawUi3dLabels || { score: 'Score', speed: 'Speed', cost: 'Cost' };
+      }
 
       const DATA = {
         coding:        { score: 12.27, speed: 13.58, Cost: -30.58 },
@@ -2063,9 +2119,9 @@
         return (range[0] + val * (range[1] - range[0])).toFixed(0) + '%';
       }
 
-      const lX = makeLabel('SPEED GAIN (%)', '#3b82f6'); lX.position.set(L + 0.22, 0, 0); axG.add(lX);
+      const lX = makeLabel('SPEED Δ (%)', '#3b82f6'); lX.position.set(L + 0.22, 0, 0); axG.add(lX);
       const lY = makeLabel('SCORE GAIN (%)', '#f97316'); lY.position.set(0, L + 0.16, 0); axG.add(lY);
-      const lZ = makeLabel('COST GAIN (%)', '#8b5cf6'); lZ.position.set(0, 0, L + 0.22); axG.add(lZ);
+      const lZ = makeLabel('COST Δ (%)', '#8b5cf6'); lZ.position.set(0, 0, L + 0.22); axG.add(lZ);
       axG.position.set(-0.5, -0.5, -0.5);
       scene.add(axG);
 
@@ -2135,7 +2191,7 @@
 
         legend.innerHTML = '';
         tasks.forEach((t) => {
-          legend.innerHTML += "<div class='qc3d-leg-item'><span class='qc3d-leg-dot' style='background:" + taskConfig[t].color + "'></span>" + t + "</div>";
+          legend.innerHTML += "<div class='qc3d-leg-item'><span class='qc3d-leg-dot' style='background:" + taskConfig[t].color + "'></span>" + getTaskLabel(t) + "</div>";
         });
       }
 
@@ -2166,10 +2222,11 @@
           tt.style.left = (e.clientX - r.left + 14) + 'px';
           tt.style.top = (e.clientY - r.top - 10) + 'px';
           const sC = ud.d.score >= 0 ? '#4a9a5a' : '#c05050';
-          tt.innerHTML = "<div class='qc3d-tt-name' style='color:" + ud.cfg.color + "'>" + ud.task + "</div>" +
-            "<div class='qc3d-tt-row'><span>Score</span><strong style='color:" + sC + "'>" + (ud.d.score >= 0 ? '+' : '') + ud.d.score.toFixed(2) + "%</strong></div>" +
-            "<div class='qc3d-tt-row'><span>Speed</span><strong>" + (ud.d.speed >= 0 ? '+' : '') + ud.d.speed.toFixed(2) + "%</strong></div>" +
-            "<div class='qc3d-tt-row'><span>Cost</span><strong>" + (ud.d.Cost >= 0 ? '+' : '') + ud.d.Cost.toFixed(2) + "%</strong></div>";
+          const ui = get3dUi();
+          tt.innerHTML = "<div class='qc3d-tt-name' style='color:" + ud.cfg.color + "'>" + getTaskLabel(ud.task) + "</div>" +
+            "<div class='qc3d-tt-row'><span>" + ui.score + "</span><strong style='color:" + sC + "'>" + (ud.d.score >= 0 ? '+' : '') + ud.d.score.toFixed(2) + "%</strong></div>" +
+            "<div class='qc3d-tt-row'><span>" + ui.speed + "</span><strong>" + (ud.d.speed >= 0 ? '+' : '') + ud.d.speed.toFixed(2) + "%</strong></div>" +
+            "<div class='qc3d-tt-row'><span>" + ui.cost + "</span><strong>" + (ud.d.Cost >= 0 ? '+' : '') + ud.d.Cost.toFixed(2) + "%</strong></div>";
         } else {
           tt.classList.remove('show');
         }
@@ -2189,6 +2246,10 @@
       })();
 
       rebuildScene();
+      window.__quantclawRefresh3DLabels = function () {
+        tt.classList.remove('show');
+        rebuildScene();
+      };
     })();
   </script>
   <!-- Lightbox overlay -->
@@ -2266,6 +2327,423 @@
           }
         });
       });
+    })();
+  </script>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "quantclaw-lang";
+      const langButtons = document.querySelectorAll(".lang-btn");
+      const langToggle = document.querySelector(".lang-toggle");
+      const sensitivityGroup = document.querySelector("#findings .sensitivity-switcher");
+      const routingGroup = document.querySelector("#routing-policy .tradeoff-tabs");
+
+      const TASK_LABELS = {
+        zh: {
+          coding: "编程",
+          communication: "沟通",
+          compliance: "合规",
+          comprehension: "理解",
+          content: "内容",
+          data_analysis: "数据分析",
+          file_ops: "文件操作",
+          finance: "金融",
+          knowledge: "知识",
+          memory: "记忆",
+          multimodal: "多模态",
+          office_qa: "办公问答",
+          operations: "运维",
+          ops: "运维操作",
+          organization: "组织",
+          procurement: "采购",
+          productivity: "生产力",
+          research: "研究",
+          rewriting: "改写",
+          safety: "安全",
+          security: "安全防护",
+          synthesis: "综合",
+          terminal: "终端",
+          workflow: "工作流"
+        },
+        en: {}
+      };
+
+      const TASK_NAME_MAP = {
+        Coding: "编程",
+        Communication: "沟通",
+        Compliance: "合规",
+        Comprehension: "理解",
+        Content: "内容",
+        "Data Analysis": "数据分析",
+        File_ops: "文件操作",
+        Finance: "金融",
+        Knowledge: "知识",
+        Memory: "记忆",
+        Multimodal: "多模态",
+        "Office QA": "办公问答",
+        Operations: "运维",
+        Ops: "运维操作",
+        Organization: "组织",
+        Procurement: "采购",
+        Productivity: "生产力",
+        Research: "研究",
+        Rewriting: "改写",
+        Safety: "安全",
+        Security: "安全防护",
+        Synthesis: "综合",
+        Terminal: "终端",
+        Workflow: "工作流"
+      };
+
+      const COPY = {
+        en: {
+          title: "QuantClaw: Precision Where It Matters for OpenClaw",
+          nav: ["Background", "Findings", "Routing Policy", "QuantClaw"],
+          navBadge: "Research Blog",
+          heroTag: "OpenClaw Quantization Research",
+          heroTitle: "<span class='word-quant'>Quant</span><span class='word-claw'>Claw</span>: Precision Where It Matters for OpenClaw",
+          heroSub: "Not every query needs a supercomputer. We benchmarked model quantization across OpenClaw's full task spectrum and developed a router plugin that sends each query exactly where it belongs. Cut costs by ~20%, speed up ~10% without sacrificing capabilities.",
+          heroButtons: ["Explore QuantClaw →", "GitHub Link", "Paper Link"],
+          stats: ["Task Types", "Model Scale", "Cost Cut", "Speed Up"],
+          backgroundTag: "Background",
+          backgroundTitle: "Why Quantization Matters for OpenClaw",
+          backgroundLead: "OpenClaw has become one of the hottest open-source AI assistant projects of 2026. By combining large language models with browser control, Shell execution, memory, and automation tools, it transforms an AI assistant from a chatbot into an agent that can complete real workflows on the user’s behalf.",
+          backgroundParas: [
+            "<strong>However, this capability comes at a steep token cost.</strong> Even a seemingly simple query can trigger far more than a single response, as OpenClaw often has to carry long system prompts, conversation history, tool outputs, and multi-step reasoning into each API call. In practice, users are paying not only for the answer itself, but for the overhead of running a full agent system.",
+            "<strong>Model quantization can make models cheaper and faster to run.</strong> By reducing numerical precision from 32-bit floats down to 4-bit or even 2-bit, quantization can dramatically shrink memory footprint and compute. However, its effect on agentic tasks remains unclear, motivating the following questions:"
+          ],
+          questionTitle: "Research Questions",
+          questions: [
+            "(1) How does quantization affect OpenClaw overall?",
+            "(2) How does its impact vary across different task types?",
+            "(3) How much cost can we actually save and how much speedup can we achieve in practice through quantization?"
+          ],
+          findingsTag: "Findings",
+          findingsTitle: "Quantization Impact on OpenClaw",
+          findingsLead: "To comprehensively understand how quantization affects OpenClaw's performance, we conducted an extensive study using <strong>Claw-Eval</strong> (release v0.0.0) which spans <strong>24 distinct task types</strong>, <strong>104 tasks</strong>, and <strong>6 models</strong> at scales ranging from <strong>9B to 744B</strong>. Each task was executed over 6 independent trials and evaluated via LLM judge and automated metrics across both BF16/FP8 (high-precision) and NVFP4 (quantized) configurations.",
+          modelSummary: "Model Summary",
+          modelHeaders: ["Models", "Parameters (B)", "BF16/FP8 Score", "NVFP4 Score"],
+          scalingTitle: "Scaling Effect",
+          scalingCopy: "Quantization degradation exhibits a power-type scaling behavior with model size. Our sweep across 9B-744B models shows that smaller models (&lt;30B) experience 3-5% performance degradation under NVFP4 quantization, whereas large models (200B+) degrade by less than 2%, and in some cases even achieve slight performance gains (+0.9% to +1.4%).",
+          sensitivityTitle: "Task Sensitivity Analysis: Quantization Varies by Task Types",
+          sensitivityTabs: [
+            "🔴 High Sensitivity <span class='tab-count'>9</span>",
+            "🟢 Low Sensitivity <span class='tab-count'>6</span>",
+            "🟡 Moderate Sensitivity <span class='tab-count'>9</span>"
+          ],
+          sensitivityIntro: "Based on the experimental results, we divide different task types into three levels: 🔴 High Sensitivity, 🟢 Low Sensitivity and 🟡 Moderate Sensitivity.",
+          sensitivityHeaders: ["Task Category", "Score Gain"],
+          sensitivityNote: "Score Gain is computed as (BF16 - NVFP4) / (BF16).",
+          highIntro: "These tasks suffer significant performance degradation with quantization, requiring BF16/FP8 precision for reliable execution:",
+          highInsight: "<strong>Key Insight:</strong> Tasks involving <strong>Code generation</strong>, <strong>Safety-critical decisions</strong> and <strong>Complex operational workflows</strong> exhibit high quantization sensitivity. These domains share a common trait: they require precise boundary discrimination where small perturbations in model outputs can trigger qualitatively wrong actions, such as incorrect tool calls, policy violations, or safety failures. It suggests that these tasks may require BF16/FP8 precision to maintain reliability and accuracy.",
+          lowIntro: "These tasks maintain or improve performance with NVFP4 quantization across model scales:",
+          lowInsight: "<strong>Key Insight:</strong> <strong>Knowledge retrieval</strong>, <strong>analytical</strong>, and <strong>QA tasks</strong> tend to tolerate quantization. The consistent performance gains across comprehension, research, and analytical tasks suggest that NVFP4 may function as an implicit regularizer to encourage generalizable representations.",
+          moderateIntro: "These tasks exhibit variable quantization tolerance:",
+          moderateInsight: "<strong>Key Insight:</strong> <strong>Memory</strong>, <strong>Simple operations</strong> and <strong>Communication</strong> tasks show moderate sensitivity to quantization. These tasks can flexibly use either precision format depending on cost-speed performance requirements.",
+          routingTag: "Routing Policy",
+          routingTitle: "Score, Speed and Cost",
+          routingIntro: "Based on the task sensitivity analysis and observed tradeoffs between score, speed, and cost, we derive a deployment guideline for choosing between BF16/FP8 and NVFP4 quantization along three optimization targets:",
+          routingList: [
+            "<strong>Score vs. Speed (Faster)</strong>: Minimize inference latency without quality degradation - prioritize tasks where latency reduction outweighs marginal score changes",
+            "<strong>Score vs. Cost (Cheaper)</strong>: Minimize inference spend at parity - target tasks where quality holds steady or improves as cost drops",
+            "<strong>Score vs. Cost vs. Speed</strong>: Optimize all three simultaneously - identify tasks where faster, cheaper inference also yields better outputs"
+          ],
+          routingViewsTitle: "Routing Views",
+          routingTabs: ["🏆 Score vs Speed", "💰 Score vs Cost"],
+          routingNote: "Click the tabs to switch views.",
+          routingMetricNote: "Speed Δ = (BF16 Speed - NVFP4 Speed) / (BF16 Speed). Cost Δ = (BF16 Cost - NVFP4 Cost) / (BF16 Cost).",
+          speedHeader: "🏆 Score vs Speed",
+          costHeader: "💰 Score vs Cost",
+          routingSpeedHeaders: ["Rank", "Task Category", "Preferred Precision", "Speed Δ", "Score Gain"],
+          routingCostHeaders: ["Rank", "Task Category", "Preferred Precision", "Cost Δ", "Score Gain"],
+          speedRecommendation: "<strong>Recommendation:</strong> For <strong>speed-critical applications</strong>, NVFP4 is preferred for the bottom 7 tasks, delivering faster inference or maintained/improved quality. Reserve BF16/FP8 for the top 17 precision-critical tasks where speed degradation is acceptable to preserve accuracy.",
+          costRecommendation: "<strong>Recommendation:</strong> For <strong>cost-critical applications</strong>, NVFP4 is preferred for the bottom 11 tasks, delivering positive or neutral score gain impact (-10.06% to +0.83%) with significant cost savings. Reserve BF16/FP8 for the top 13 tasks where quantization severely degrades score performance, particularly Coding, Safety, and Compliance where score loss exceeds 5% and justifies the precision premium.",
+          chartTitle: "⚖️ Score vs Speed vs Cost",
+          chartSubtitle: "X: SPEED Δ · Y (vertical): SCORE GAIN · Z: COST Δ",
+          chartHint: "<span>&#x21ba;</span> Drag to rotate &nbsp;&middot;&nbsp; <span>&#x2295;</span> Scroll to zoom &nbsp;&middot;&nbsp; <span>&#x25C9;</span> Hover for details &nbsp;&middot;&nbsp; Auto-rotates after 3s idle",
+          quantTag: "QuantClaw",
+          quantTitle: "Introducing QuantClaw",
+          overviewLabel: "Overview",
+          quantIntro: "QuantClaw is a plug-and-play task-type routing quantization plugin designed for OpenClaw. It enables model precision switching based on task type for user-submitted queries, striking an effective balance between quality, efficiency, and cost. QuantClaw features <strong>automatic adaptation</strong>, <strong>intelligent routing</strong>, <strong>full customizability</strong>, and <strong>built-in observability</strong>.",
+          featureTitles: ["Automatic Adaptation", "Intelligent Routing", "Full Customizability", "Built-in Dashboard and Observability"],
+          featureBodies: [
+            "Given a user query, QuantClaw automatically determines the most suitable routing path without requiring the user to manually choose precision. It currently supports ordered detectors, including <code>ruleDetector</code> and <code>loadModelDetector</code>. In a typical workflow, <code>ruleDetector</code> first attempts to classify the query using predefined keywords, patterns, and task-type descriptions. If no reliable match is found, <code>loadModelDetector</code> invokes a judge model to identify the most appropriate task type. This allows QuantClaw to adapt dynamically to both explicit and ambiguous user intents.",
+            "Based on previous <strong>Tasks Sensitivity Analysis</strong>, QuantClaw maps each request to a predefined precision tier such as 4-bit, 8-bit, or 16-bit, and routes it to the corresponding bit-level model. This allows quantization-tolerant tasks to run on faster, more economical models, while reserving precision-critical tasks for higher-precision variants. By decoupling task understanding from model selection, QuantClaw makes routing decisions explainable, latency-aware, and cost-conscious.",
+            "QuantClaw is designed to be fully configurable. Developers can define task types, detector order, keywords, regex patterns, precision mappings, model targets, fallback paths, and pricing policies according to their own workload requirements. This makes QuantClaw suitable for a wide range of deployment strategies, from low-cost everyday assistants to more advanced multi-model systems that require precise control over speed, quality, and budget.",
+            "QuantClaw includes a built-in dashboard for monitoring routing behavior, token usage, cost, and detection results in real time. It also supports live configuration and testing, making QuantClaw an observable and tunable routing layer within OpenClaw."
+          ],
+          benefitsTitle: "Benefits from QuantClaw",
+          benefitsCopy: "Since task sensitivity analysis is conducted on Claw-Eval using NVFP4 quantization, we also performed experiments on the PinchBench benchmark and INT4 data format to verify the generalizability of our findings. QuantClaw achieves up to 1.09× speedup and 21.7% cost savings on GLM-4.7-Flash, and 1.04× speedup and 6.3% cost savings on GLM-5, compared to the FP8/BF16 baselines, while maintaining or improving accuracy.",
+          benefitHeaders: ["Model", "Approach", "PinchBench (Best / Avg)", "Cost(usd) per task", "Time(s) per task"],
+          benefitBadges: ["All BF16", "All INT4", "QuantClaw", "All FP8", "All INT4", "QuantClaw"],
+          moreResults: "<em>More results will be updated soon</em>",
+          biggerPictureTitle: "The Bigger Picture",
+          biggerQuote: "The future of personal AI assistants are not a single model running at maximum capacity all the time. It is a coordinated OpenClaw system where models of different strengths are dispatched intelligently according to the work that actually needs to be done.",
+          biggerBody: "QuantClaw shows what OpenClaw can become when orchestration is treated as a first-class capability rather than an afterthought. The value of OpenClaw is not just that it can connect to many models, but that it can decide how those models should be used together. Most user requests do not need maximum capability, maximum cost, and maximum latency all at once. What they need is the right level of capability for the task. QuantClaw gives OpenClaw that decision layer: routing lightweight tasks to cheaper precision tiers, preserving stronger models for more demanding work, and making the entire system more efficient without increasing user complexity. In that sense, QuantClaw is not just a plugin for OpenClaw; it is a concrete example of how OpenClaw becomes a real multi-model collaborative system.",
+          footerContributors: "Contributors: SparkEngineAI Team",
+          ui3d: { score: "Score", speed: "Speed", cost: "Cost" }
+        },
+        zh: {
+          title: "QuantClaw：按需精度，为OpenClaw量身而量",
+          nav: ["研究背景", "关键发现", "路由策略", "QuantClaw介绍"],
+          navBadge: "研究博客",
+          heroTag: "OpenClaw量化研究",
+          heroTitle: "<span class='word-quant'>Quant</span><span class='word-claw'>Claw</span>：按需精度，为OpenClaw量身而量",
+          heroSub: "并不是每个查询都需要超级计算机。我们系统评测了OpenClaw在不同任务上的模型量化表现，并开发了一个路由插件，把每个查询发送到最合适的精度层级。在不牺牲能力的前提下，实现~20%成本降低和~10%速度提升。",
+          heroButtons: ["使用QuantClaw →", "GitHub 链接", "论文链接"],
+          stats: ["任务类型", "模型规模", "成本下降", "速度提升"],
+          backgroundTag: "背景",
+          backgroundTitle: "为什么量化对OpenClaw很重要",
+          backgroundLead: "OpenClaw已经成为2026年最受关注的开源AI助手项目之一。它把大语言模型与浏览器控制、Shell 执行、记忆和自动化工具结合起来，让AI助手从只能聊天的机器人，变成真正可以执行任务的智能体。正是这种兼具自主性与可用性的能力，使OpenClaw受到广泛关注：它不只是回答问题，而是代表用户完成真实工作流。",
+          backgroundParas: [
+            "<strong>但这种能力也伴随着高昂的token成本。</strong> 即便是看似简单的查询，OpenClaw往往也不只是生成一次回复，而是需要在每次API调用中携带长系统提示词、对话历史、工具输出以及多步推理过程。实际使用中，用户支付的并不只是答案本身，还有整个智能体系统运行的额外开销。",
+            "<strong>模型量化可以让模型更便宜、更快。</strong> 通过把数值精度从32-bit浮点降低到4-bit甚至2-bit，量化可以显著减少显存占用和计算开销。但量化对智能体任务（agentic tasks）的影响是不明确的，这也促使我们进一步研究以下问题："
+          ],
+          questionTitle: "研究问题",
+          questions: [
+            "(1) 量化整体上会如何影响OpenClaw？",
+            "(2) 这种影响在不同任务类型之间会如何变化？",
+            "(3) 在真实场景中，量化究竟能节省多少成本，又能带来多少加速？"
+          ],
+          findingsTag: "关键发现",
+          findingsTitle: "量化对OpenClaw的影响",
+          findingsLead: "为了系统理解量化如何影响OpenClaw的表现，我们基于<strong>Claw-Eval</strong>（release v0.0.0）进行了大规模研究，覆盖<strong>24种任务类型</strong>、<strong>104个任务</strong>和<strong>6个模型</strong>，模型规模从<strong>9B到744B</strong>不等。每个任务均执行6次独立试验，并通过LLM judge与自动化指标在BF16/FP8（高精度）和NVFP4（低精度）两种配置下进行评估。",
+          modelSummary: "模型概要",
+          modelHeaders: ["模型", "参数量(B)", "BF16/FP8得分", "NVFP4得分"],
+          scalingTitle: "规模效应",
+          scalingCopy: "量化带来的性能退化随模型规模呈现幂律式变化。我们对9B-744B模型的全面测试表明，小模型（&lt;30B）在NVFP4量化下会出现3-5%的性能下降；而大模型（200B+）的下降通常低于2%，某些情况下甚至还会出现轻微增益（+0.9% 到 +1.4%）。",
+          sensitivityTitle: "任务敏感性分析：量化影响因任务类型而异",
+          sensitivityTabs: [
+            "🔴 高敏感 <span class='tab-count'>9</span>",
+            "🟢 低敏感 <span class='tab-count'>6</span>",
+            "🟡 中敏感 <span class='tab-count'>9</span>"
+          ],
+          sensitivityIntro: "基于实验结果，我们将不同任务类型划分为三个层级：🔴高敏感、🟢低敏感和🟡中敏感。",
+          sensitivityHeaders: ["任务类别", "得分差"],
+          sensitivityNote: "得分差的计算方式为 (BF16 - NVFP4) / (BF16)。",
+          highIntro: "这些任务在量化后会出现明显性能退化，因此需要BF16/FP8精度来保证稳定执行：",
+          highInsight: "<strong>关键洞察：</strong>涉及<strong>代码生成</strong>、<strong>安全关键决策</strong>和<strong>复杂操作工作流</strong>的任务对量化高度敏感。这些领域的共同特征是需要精确的边界判别，模型输出的微小扰动都可能导致性质完全错误的行为，例如错误的工具调用、策略违规或安全失败。因此，这类任务更适合使用BF16/FP8精度来维持可靠性与准确性。",
+          lowIntro: "这些任务在NVFP4量化下，跨不同模型规模均能保持或提升性能：",
+          lowInsight: "<strong>关键洞察：</strong><strong>知识检索</strong>、<strong>分析类</strong>与<strong>问答类任务</strong>对量化具有较强容忍度。理解、研究和分析任务上的持续增益表明，NVFP4可能在一定程度上充当了隐式正则化器，从而促进更具泛化性的表示。",
+          moderateIntro: "这些任务表现出中等程度的量化容忍度：",
+          moderateInsight: "<strong>关键洞察：</strong><strong>记忆</strong>、<strong>简单操作</strong>和<strong>沟通</strong>任务对量化呈现中等敏感度。这类任务可以根据成本与速度需求灵活选择不同精度格式。",
+          routingTag: "路由策略",
+          routingTitle: "得分、速度与成本",
+          routingIntro: "基于任务敏感性分析以及得分、速度、成本之间的权衡，我们给出BF16/FP8与NVFP4量化配置的部署指导，围绕三个优化目标进行选择：",
+          routingList: [
+            "<strong>得分 vs 速度（更快）</strong>：在不牺牲质量的前提下降低推理时延，优先选择速度收益大于分数边际变化的任务",
+            "<strong>得分 vs 成本（更便宜）</strong>：在质量基本持平的情况下压低推理成本，重点关注成本降低时仍能保持或提升质量的任务",
+            "<strong>得分 vs 成本 vs 速度</strong>：同时优化三者，识别那些更快、更便宜，同时输出也更好的任务"
+          ],
+          routingViewsTitle: "路由视图",
+          routingTabs: ["🏆 得分 vs 速度", "💰 得分 vs 成本"],
+          routingNote: "点击标签切换视图。",
+          routingMetricNote: "Speed Δ = (BF16 Speed - NVFP4 Speed) / (BF16 Speed)。Cost Δ = (BF16 Cost - NVFP4 Cost) / (BF16 Cost)。",
+          speedHeader: "🏆 得分 vs 速度",
+          costHeader: "💰 得分 vs 成本",
+          routingSpeedHeaders: ["排名", "任务类别", "推荐精度", "速度差", "得分差"],
+          routingCostHeaders: ["排名", "任务类别", "推荐精度", "成本差", "得分差"],
+          speedRecommendation: "<strong>建议</strong>对于<strong>速度敏感型应用</strong>，底部7类任务更适合使用4-bit，因为这样能够带来更快推理，或至少在保持/提升质量的同时获得速度优势。顶部17类精度敏感任务则应保留16/8-bit，以在可接受的速度代价下维持准确性。",
+          costRecommendation: "<strong>建议：</strong>对于<strong>成本敏感型应用</strong>，底部11类任务更适合使用4-bit，因为它们在获得显著成本节省的同时，得分影响为正向或基本中性（-10.06%到+0.83%）。顶部13类任务中，量化会明显损害得分表现，尤其是编程、安全与合规，得分损失超过5%，因此更值得承担高精度成本。",
+          chartTitle: "⚖️ 得分 vs 速度 vs 成本",
+          chartSubtitle: "X：速度差 · Y（垂直）：得分差 · Z：成本差",
+          chartHint: "<span>&#x21ba;</span> 拖拽旋转 &nbsp;&middot;&nbsp; <span>&#x2295;</span> 滚轮缩放 &nbsp;&middot;&nbsp; <span>&#x25C9;</span> 悬停查看详情 &nbsp;&middot;&nbsp; 3秒无操作后自动旋转",
+          quantTag: "QuantClaw",
+          quantTitle: "QuantClaw介绍",
+          overviewLabel: "概览",
+          quantIntro: "QuantClaw是为OpenClaw设计的即插即用任务类型路由量化插件。它可以根据用户查询所属的任务类型切换模型精度，在质量、效率与成本之间取得有效平衡。QuantClaw具备<strong>自动适配</strong>、<strong>智能路由</strong>、<strong>完全可定制</strong> 和<strong>内置可观测性</strong>等特性。",
+          featureTitles: ["自动适配", "智能路由", "完全可定制", "内置看板与可观测性"],
+          featureBodies: [
+            "给定用户查询后，QuantClaw会自动决定最合适的路由路径，用户无需手动选择精度。当前支持按顺序执行的检测器，包括<code>ruleDetector</code>和<code>loadModelDetector</code>。在典型工作流中，<code>ruleDetector</code>会先根据预定义关键词、模式和任务类型描述对用户查询进行分类；如果没有可靠匹配，<code>loadModelDetector</code>会调用判定模型（judge model）识别最合适的任务类型。这使QuantClaw能够动态适应明确的和模糊的用户意图。",
+            "基于前面的<strong>任务敏感性分析</strong>，QuantClaw会把每个请求映射到预定义的精度层级（如4-bit、8-bit或16-bit），并路由到对应精度的模型。这样，量化容忍度高的任务可以运行在更快、更经济的模型上，而精度敏感任务则保留给更高精度模型。通过把任务理解与模型选择解耦，QuantClaw实现了可解释，延迟感知且成本敏感的路由决策。",
+            "QuantClaw采用完全可配置设计。开发者可以根据自身工作负载要求，自定义任务类型、检测器顺序、关键词、正则匹配模式、精度映射、目标模型、回退路径和计费策略。这使QuantClaw能够适配从低成本日常助手，到需要精确控制速度、质量与预算的复杂多模型系统等多种部署策略。",
+            "QuantClaw内置了用于监控路由行为、token使用、成本和检测结果的实时看板，也支持在线配置与测试，使其成为OpenClaw中一个可观测、可调优的路由层。"
+          ],
+          benefitsTitle: "QuantClaw带来的收益",
+          benefitsCopy: "由于任务敏感性分析是在Claw-Eval上基于NVFP4量化完成的，我们还在PinchBench基准测试和INT4数据格式上进行了实验，以验证这些结论的泛化性。相较于BF16基线，QuantClaw在GLM-4.7-Flash上实现了最高1.09×加速与21.7%成本节省。相较于FP8基线，在GLM-5上实现了1.04×加速与6.3%成本节省，同时保持甚至提升了准确率。",
+          benefitHeaders: ["模型", "方案", "PinchBench（最佳 / 平均）", "每任务成本（USD）", "每任务耗时（s）"],
+          benefitBadges: ["全BF16", "全INT4", "QuantClaw", "全FP8", "全INT4", "QuantClaw"],
+          moreResults: "<em>更多结果即将更新</em>",
+          biggerPictureTitle: "更大的图景",
+          biggerQuote: "个人AI助手的未来，不会是单一模型始终以最大能力满负荷运行，而会是一个协同的OpenClaw系统：根据真实任务需求，智能调度不同能力的模型。",
+          biggerBody: "QuantClaw展示了当编排能力被视为核心能力而不是事后补丁时，OpenClaw能演化成什么样子。OpenClaw的价值不仅在于它能连接多个模型，还应在于它能决定这些模型如何协同工作。大多数用户请求并不需要同时获得最大能力、最高成本和最长时延，它们真正需要的是与任务匹配的能力层级。QuantClaw为OpenClaw提供了这样一层决策能力：把轻量任务路由到更便宜的精度层级，把更强模型保留给更复杂的工作，在不增加用户复杂度的情况下提升整个系统效率。从这个意义上说，QuantClaw不只是OpenClaw的一个插件，更是OpenClaw如何成为真正多模型协同系统的具体范例。",
+          footerContributors: "贡献者：SparkEngineAI Team",
+          ui3d: { score: "得分", speed: "速度", cost: "成本" }
+        }
+      };
+
+      function setText(selector, value) {
+        const el = document.querySelector(selector);
+        if (el && value != null) el.textContent = value;
+      }
+
+      function setHTML(selector, value) {
+        const el = document.querySelector(selector);
+        if (el && value != null) el.innerHTML = value;
+      }
+
+      function setAllText(selector, values) {
+        document.querySelectorAll(selector).forEach(function (el, index) {
+          if (values[index] != null) el.textContent = values[index];
+        });
+      }
+
+      function setAllHTML(selector, values) {
+        document.querySelectorAll(selector).forEach(function (el, index) {
+          if (values[index] != null) el.innerHTML = values[index];
+        });
+      }
+
+      function updateTaskTypeLabels(lang) {
+        document.querySelectorAll(".task-type-label").forEach(function (el) {
+          const raw = el.textContent.replace(/\s+/g, " ").trim();
+          const match = raw.match(/^(\S+)\s+(.+)$/);
+          if (!match) return;
+          const icon = el.dataset.taskIcon || match[1];
+          const baseName = el.dataset.taskBase || match[2];
+          el.dataset.taskIcon = icon;
+          el.dataset.taskBase = baseName;
+          const translated = lang === "zh" ? (TASK_NAME_MAP[baseName] || baseName) : baseName;
+          el.innerHTML = icon + " " + translated;
+        });
+      }
+
+      function updateBenefitBadges(labels) {
+        document.querySelectorAll(".benefits-wrap tbody tr .badge").forEach(function (badge, index) {
+          if (labels[index] != null) badge.textContent = labels[index];
+        });
+      }
+
+      function applyLanguage(lang) {
+        const t = COPY[lang] || COPY.en;
+        document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+        document.title = t.title;
+        window.__quantclawLang = lang;
+        window.__quantclawTaskLabels = TASK_LABELS[lang] || {};
+        window.__quantclawUi3dLabels = t.ui3d;
+
+        if (langToggle) {
+          langToggle.setAttribute("aria-label", lang === "zh" ? "语言切换" : "Language switch");
+        }
+        if (sensitivityGroup) {
+          sensitivityGroup.setAttribute("aria-label", lang === "zh" ? "任务敏感度切换" : "Task sensitivity switch");
+        }
+        if (routingGroup) {
+          routingGroup.setAttribute("aria-label", lang === "zh" ? "路由策略切换" : "Routing policy switch");
+        }
+
+        document.querySelectorAll(".nav-links a").forEach(function (el, index) {
+          if (t.nav[index] != null) el.textContent = t.nav[index];
+        });
+        setText(".nav-badge", t.navBadge);
+        setText(".hero-tag", t.heroTag);
+        setHTML("h1", t.heroTitle);
+        setHTML(".hero-sub", t.heroSub);
+        setAllText(".hero-actions a", t.heroButtons);
+        setAllText(".stat-label", t.stats);
+
+        setText("#background .section-tag", t.backgroundTag);
+        setText("#background h2", t.backgroundTitle);
+        setHTML("#background .lead", t.backgroundLead);
+        const bgParas = document.querySelectorAll("#background .content-card > p");
+        if (bgParas[0]) bgParas[0].innerHTML = t.backgroundParas[0];
+        if (bgParas[1]) bgParas[1].innerHTML = t.backgroundParas[1];
+        setText("#background .question-list .card-label", t.questionTitle);
+        setAllHTML("#background .question-list p", t.questions);
+
+        setText("#findings .section-tag", t.findingsTag);
+        setText("#findings h2", t.findingsTitle);
+        setHTML("#findings .lead", t.findingsLead);
+        setText("#findings .table-title", t.modelSummary);
+        setAllText("#findings .model-summary-table thead th", t.modelHeaders);
+        setText("#findings .image-panel.no-frame h3", t.scalingTitle);
+        setHTML("#findings .image-panel.no-frame p", t.scalingCopy);
+        setText("#findings .switch-head h3", t.sensitivityTitle);
+        setAllHTML("#findings .sensitivity-switcher .switch-btn", t.sensitivityTabs);
+        setText("#findings .switch-card.no-frame > .switch-intro", t.sensitivityIntro);
+        setText("#findings .sensitivity-note", t.sensitivityNote);
+        document.querySelectorAll("#findings [data-panel='sensitivity'] table thead tr").forEach(function (row) {
+          const ths = row.querySelectorAll("th");
+          if (ths[0]) ths[0].textContent = t.sensitivityHeaders[0];
+          if (ths[1]) ths[1].textContent = t.sensitivityHeaders[1];
+        });
+        setText("#findings [data-name='high'] > .switch-intro", t.highIntro);
+        setHTML("#findings [data-name='high'] .insight-callout", t.highInsight);
+        setText("#findings [data-name='low'] > .switch-intro", t.lowIntro);
+        setHTML("#findings [data-name='low'] .insight-callout", t.lowInsight);
+        setText("#findings [data-name='moderate'] > .switch-intro", t.moderateIntro);
+        setHTML("#findings [data-name='moderate'] .insight-callout", t.moderateInsight);
+
+        setText("#routing-policy .section-tag", t.routingTag);
+        setText("#routing-policy h2", t.routingTitle);
+        setText("#routing-policy .routing-intro > p", t.routingIntro);
+        setAllHTML("#routing-policy .numbered-points li", t.routingList);
+        setText("#routing-policy .switch-head h3", t.routingViewsTitle);
+        setAllText("#routing-policy .tradeoff-tabs .switch-btn", t.routingTabs);
+        setText("#routing-policy .section-note", t.routingNote);
+        setText("#routing-policy .routing-metric-note", t.routingMetricNote);
+        const routingHeaders = document.querySelectorAll("#routing-policy .findings-header > span:last-child");
+        if (routingHeaders[0]) routingHeaders[0].textContent = t.speedHeader;
+        if (routingHeaders[1]) routingHeaders[1].textContent = t.costHeader;
+        const speedThs = document.querySelectorAll("#routing-policy [data-name='speed'] thead th");
+        speedThs.forEach(function (th, index) {
+          if (t.routingSpeedHeaders[index] != null) th.textContent = t.routingSpeedHeaders[index];
+        });
+        const costThs = document.querySelectorAll("#routing-policy [data-name='cost'] thead th");
+        costThs.forEach(function (th, index) {
+          if (t.routingCostHeaders[index] != null) th.textContent = t.routingCostHeaders[index];
+        });
+        setHTML("#routing-policy [data-name='speed'] .recommendation", t.speedRecommendation);
+        setHTML("#routing-policy [data-name='cost'] .recommendation", t.costRecommendation);
+        setText("#routing-policy .routing-chart h3", t.chartTitle);
+        setText("#routing-policy .qc3d-subtitle", t.chartSubtitle);
+        setHTML("#routing-policy .qc3d-hint", t.chartHint);
+
+        setText("#quantclaw .section-tag", t.quantTag);
+        setText("#quantclaw h2", t.quantTitle);
+        setText("#quantclaw .quantclaw-overview .card-label", t.overviewLabel);
+        setHTML("#quantclaw .router-hero .content-card p", t.quantIntro);
+        const featureTitles = document.querySelectorAll("#quantclaw .feature-card h3");
+        const featureBodies = document.querySelectorAll("#quantclaw .feature-card > p");
+        featureTitles.forEach(function (el, index) {
+          if (t.featureTitles[index] != null) el.textContent = t.featureTitles[index];
+        });
+        featureBodies.forEach(function (el, index) {
+          if (t.featureBodies[index] != null) el.innerHTML = t.featureBodies[index];
+        });
+        setText("#quantclaw .benefits-title", t.benefitsTitle);
+        setText("#quantclaw .benefits-copy", t.benefitsCopy);
+        setAllText("#quantclaw .benefits-wrap thead th", t.benefitHeaders);
+        updateBenefitBadges(t.benefitBadges);
+        setHTML("#quantclaw .benefits-wrap .content-card p", t.moreResults);
+        setText("#quantclaw .quote-card h3", t.biggerPictureTitle);
+        setText("#quantclaw .quote-card blockquote", t.biggerQuote);
+        setText("#quantclaw .quote-card > p", t.biggerBody);
+        setText("footer div:last-child", t.footerContributors);
+
+        updateTaskTypeLabels(lang);
+
+        if (window.__quantclawRefresh3DLabels) {
+          window.__quantclawRefresh3DLabels();
+        }
+
+        langButtons.forEach(function (btn) {
+          const active = btn.dataset.lang === lang;
+          btn.classList.toggle("is-active", active);
+          btn.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+
+        localStorage.setItem(STORAGE_KEY, lang);
+      }
+
+      langButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          applyLanguage(btn.dataset.lang === "zh" ? "zh" : "en");
+        });
+      });
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+      applyLanguage(saved === "zh" ? "zh" : "en");
     })();
   </script>
 </body>
