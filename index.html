@@ -1382,6 +1382,33 @@
         linear-gradient(180deg, #f8fafc 0%, #f3f6fb 100%);
     }
 
+    .qc3d-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.88) 0%, rgba(243, 246, 251, 0.94) 100%);
+      z-index: 1;
+      pointer-events: none;
+      transition: opacity 0.24s ease, visibility 0.24s ease;
+    }
+
+    .qc3d-loading.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .qc3d-loading.is-error {
+      color: #b45309;
+      background: linear-gradient(180deg, rgba(255, 247, 237, 0.96) 0%, rgba(255, 251, 235, 0.98) 100%);
+    }
+
     .qc3d-chart-wrap canvas {
       display: block;
       width: 100% !important;
@@ -1833,6 +1860,7 @@
           </div>
           <div class='qc3d-main-layout'>
             <div class='qc3d-chart-wrap' id='qc3d-wrap'>
+              <div class='qc3d-loading' id='qc3d-loading'>3D chart loads only when this section is visible to keep GitHub-hosted pages responsive.</div>
               <div class='qc3d-tooltip' id='qc3d-tt'></div>
             </div>
           </div>
@@ -1974,13 +2002,13 @@
       });
     });
   </script>
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'></script>
   <script>
     (function () {
       const wrap = document.getElementById('qc3d-wrap');
       const tt = document.getElementById('qc3d-tt');
       const legend = document.getElementById('qc3d-legend');
-      if (!wrap || !tt || !legend || !window.THREE) return;
+      const loading = document.getElementById('qc3d-loading');
+      if (!wrap || !tt || !legend) return;
 
       function getTaskLabel(task) {
         const labels = window.__quantclawTaskLabels || {};
@@ -2032,22 +2060,99 @@
         taskConfig[t] = { color: PALETTE[i % PALETTE.length], fontSize: 13 };
       });
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setClearColor(0xf6f8fc, 1);
-      renderer.setSize(wrap.clientWidth, wrap.clientHeight);
-      wrap.appendChild(renderer.domElement);
+      let renderer = null;
+      let scene = null;
+      let camera = null;
+      let axisGroup = null;
+      let ray = null;
+      let msv = null;
+      let animationFrameId = null;
+      let threeLoadPromise = null;
+      let chartStarted = false;
+      let chartVisible = false;
+      let pageVisible = document.visibilityState !== 'hidden';
+      let rendererBound = false;
 
-      const scene = new THREE.Scene();
-      scene.fog = new THREE.Fog(0xf6f8fc, 6, 18);
-      const camera = new THREE.PerspectiveCamera(44, wrap.clientWidth / wrap.clientHeight, 0.01, 100);
-      scene.add(new THREE.AmbientLight(0xffffff, 0.75));
-      const sun = new THREE.DirectionalLight(0xffefe0, 0.62);
-      sun.position.set(4, 6, 3);
-      scene.add(sun);
-      const fill = new THREE.DirectionalLight(0xe9f0ff, 0.34);
-      fill.position.set(-3, 2, -4);
-      scene.add(fill);
+      function getTextureScale() {
+        return Math.min(window.devicePixelRatio || 1, 2);
+      }
+
+      function createHiDPICanvas(cssWidth, cssHeight) {
+        const scale = getTextureScale();
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(cssWidth * scale);
+        cv.height = Math.round(cssHeight * scale);
+        cv.style.width = cssWidth + 'px';
+        cv.style.height = cssHeight + 'px';
+        const cx = cv.getContext('2d');
+        cx.scale(scale, scale);
+        return { cv, cx };
+      }
+
+      function getRendererProfile() {
+        const dpr = window.devicePixelRatio || 1;
+        const mem = navigator.deviceMemory || 8;
+        const cores = navigator.hardwareConcurrency || 8;
+        const area = Math.max(1, wrap.clientWidth || 1) * Math.max(1, wrap.clientHeight || 1);
+        const constrained = mem <= 4 || cores <= 4;
+        const denseViewport = area > 1100000;
+        if (constrained) {
+          return { antialias: false, pixelRatio: Math.min(dpr, 1.35) };
+        }
+        if (denseViewport) {
+          return { antialias: true, pixelRatio: Math.min(dpr, 1.6) };
+        }
+        return { antialias: true, pixelRatio: Math.min(dpr, 2) };
+      }
+
+      function applyRendererProfile() {
+        if (!renderer) return;
+        const profile = getRendererProfile();
+        renderer.setPixelRatio(profile.pixelRatio);
+      }
+
+      function setLoadingMessage(message, isError) {
+        if (!loading) return;
+        loading.textContent = message;
+        loading.classList.toggle('is-error', !!isError);
+        loading.classList.remove('is-hidden');
+      }
+
+      function loadThreeJs() {
+        if (window.THREE) return Promise.resolve(window.THREE);
+        if (threeLoadPromise) return threeLoadPromise;
+
+        threeLoadPromise = new Promise(function (resolve, reject) {
+          const existing = document.querySelector('script[data-quantclaw-three]');
+          if (existing) {
+            existing.addEventListener('load', function () { resolve(window.THREE); }, { once: true });
+            existing.addEventListener('error', function () { reject(new Error('Failed to load three.js')); }, { once: true });
+            return;
+          }
+
+          setLoadingMessage('Loading 3D chart assets...', false);
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+          script.async = true;
+          script.dataset.quantclawThree = 'true';
+          script.onload = function () {
+            if (window.THREE) {
+              resolve(window.THREE);
+            } else {
+              reject(new Error('three.js loaded but THREE is unavailable'));
+            }
+          };
+          script.onerror = function () {
+            reject(new Error('Failed to load three.js'));
+          };
+          document.head.appendChild(script);
+        }).catch(function (error) {
+          setLoadingMessage('3D chart failed to load. Please refresh the page or check network access.', true);
+          throw error;
+        });
+
+        return threeLoadPromise;
+      }
 
       function getRange(key) {
         const vals = tasks.map((t) => DATA[t][key]);
@@ -2057,38 +2162,12 @@
         return max === min ? 0.5 : (val - min) / (max - min);
       }
 
-      const axG = new THREE.Group();
       const L = 1.1;
-      const axDefs = [
-        { dir: [1,0,0], hex: 0x3b82f6 },
-        { dir: [0,1,0], hex: 0xf97316 },
-        { dir: [0,0,1], hex: 0x8b5cf6 }
-      ];
-      axDefs.forEach(({ dir, hex }) => {
-        axG.add(new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(dir[0] * L, dir[1] * L, dir[2] * L)]),
-          new THREE.LineBasicMaterial({ color: hex })
-        ));
-        const cone = new THREE.Mesh(new THREE.ConeGeometry(0.022, 0.07, 10), new THREE.MeshBasicMaterial({ color: hex }));
-        cone.position.set(dir[0] * (L + 0.038), dir[1] * (L + 0.038), dir[2] * (L + 0.038));
-        if (dir[0]) cone.rotation.z = -Math.PI / 2;
-        if (dir[2]) cone.rotation.x = Math.PI / 2;
-        axG.add(cone);
-      });
-      const gF = new THREE.LineBasicMaterial({ color: 0xd8dee8, transparent: true, opacity: 0.46 });
-      const gW = new THREE.LineBasicMaterial({ color: 0xe8def8, transparent: true, opacity: 0.22 });
-      for (let i = 0; i <= 4; i++) {
-        const t = i / 4;
-        axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,t), new THREE.Vector3(1,0,t)]), gF));
-        axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(t,0,0), new THREE.Vector3(t,0,1)]), gF));
-        axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,t,0), new THREE.Vector3(1,t,0)]), gW));
-        axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(t,0,0), new THREE.Vector3(t,1,0)]), gW));
-      }
 
       function makeLabel(txt, cssColor) {
-        const cv = document.createElement('canvas');
-        cv.width = 420; cv.height = 72;
-        const cx = cv.getContext('2d');
+        const canvas = createHiDPICanvas(420, 72);
+        const cv = canvas.cv;
+        const cx = canvas.cx;
         cx.fillStyle = 'rgba(255,255,255,.85)';
         cx.beginPath();
         if (cx.roundRect) cx.roundRect(3,3,414,66,10); else cx.rect(3,3,414,66);
@@ -2103,9 +2182,9 @@
         return sp;
       }
       function makeTick(txt, cssColor) {
-        const cv = document.createElement('canvas');
-        cv.width = 130; cv.height = 38;
-        const cx = cv.getContext('2d');
+        const canvas = createHiDPICanvas(130, 38);
+        const cv = canvas.cv;
+        const cx = canvas.cx;
         cx.fillStyle = cssColor;
         cx.font = '600 22px IBM Plex Mono, monospace';
         cx.textAlign = 'center';
@@ -2119,15 +2198,80 @@
         return (range[0] + val * (range[1] - range[0])).toFixed(0) + '%';
       }
 
-      const lX = makeLabel('SPEED Δ (%)', '#3b82f6'); lX.position.set(L + 0.22, 0, 0); axG.add(lX);
-      const lY = makeLabel('SCORE GAIN (%)', '#f97316'); lY.position.set(0, L + 0.16, 0); axG.add(lY);
-      const lZ = makeLabel('COST Δ (%)', '#8b5cf6'); lZ.position.set(0, 0, L + 0.22); axG.add(lZ);
-      axG.position.set(-0.5, -0.5, -0.5);
-      scene.add(axG);
+      function buildAxisGroup() {
+        if (axisGroup) return axisGroup;
+        const axG = new THREE.Group();
+        const axDefs = [
+          { dir: [1,0,0], hex: 0x3b82f6 },
+          { dir: [0,1,0], hex: 0xf97316 },
+          { dir: [0,0,1], hex: 0x8b5cf6 }
+        ];
+        axDefs.forEach(({ dir, hex }) => {
+          axG.add(new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(dir[0] * L, dir[1] * L, dir[2] * L)]),
+            new THREE.LineBasicMaterial({ color: hex })
+          ));
+          const cone = new THREE.Mesh(new THREE.ConeGeometry(0.022, 0.07, 10), new THREE.MeshBasicMaterial({ color: hex }));
+          cone.position.set(dir[0] * (L + 0.038), dir[1] * (L + 0.038), dir[2] * (L + 0.038));
+          if (dir[0]) cone.rotation.z = -Math.PI / 2;
+          if (dir[2]) cone.rotation.x = Math.PI / 2;
+          axG.add(cone);
+        });
+        const gF = new THREE.LineBasicMaterial({ color: 0xd8dee8, transparent: true, opacity: 0.46 });
+        const gW = new THREE.LineBasicMaterial({ color: 0xe8def8, transparent: true, opacity: 0.22 });
+        for (let i = 0; i <= 4; i++) {
+          const t = i / 4;
+          axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,t), new THREE.Vector3(1,0,t)]), gF));
+          axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(t,0,0), new THREE.Vector3(t,0,1)]), gF));
+          axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,t,0), new THREE.Vector3(1,t,0)]), gW));
+          axG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(t,0,0), new THREE.Vector3(t,1,0)]), gW));
+        }
+        const lX = makeLabel('SPEED Δ (%)', '#3b82f6'); lX.position.set(L + 0.22, 0, 0); axG.add(lX);
+        const lY = makeLabel('SCORE GAIN (%)', '#f97316'); lY.position.set(0, L + 0.16, 0); axG.add(lY);
+        const lZ = makeLabel('COST Δ (%)', '#8b5cf6'); lZ.position.set(0, 0, L + 0.22); axG.add(lZ);
+        axG.position.set(-0.5, -0.5, -0.5);
+        axisGroup = axG;
+        return axisGroup;
+      }
+
+      function hideLoading() {
+        if (loading) loading.classList.add('is-hidden');
+      }
+
+      function ensureScene() {
+        if (scene && camera && renderer) return;
+        if (!window.THREE) throw new Error('three.js is not loaded');
+        const profile = getRendererProfile();
+        renderer = new THREE.WebGLRenderer({
+          antialias: profile.antialias,
+          alpha: false,
+          powerPreference: 'low-power'
+        });
+        renderer.setPixelRatio(profile.pixelRatio);
+        renderer.setClearColor(0xf6f8fc, 1);
+        renderer.setSize(wrap.clientWidth || 1, wrap.clientHeight || 1);
+        wrap.appendChild(renderer.domElement);
+
+        scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0xf6f8fc, 6, 18);
+        camera = new THREE.PerspectiveCamera(44, (wrap.clientWidth || 1) / (wrap.clientHeight || 1), 0.01, 100);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+        const sun = new THREE.DirectionalLight(0xffefe0, 0.62);
+        sun.position.set(4, 6, 3);
+        scene.add(sun);
+        const fill = new THREE.DirectionalLight(0xe9f0ff, 0.34);
+        fill.position.set(-3, 2, -4);
+        scene.add(fill);
+        scene.add(buildAxisGroup());
+        ray = new THREE.Raycaster();
+        msv = new THREE.Vector2();
+        hideLoading();
+      }
 
       let meshes = [];
       let dynamicObjects = [];
       function rebuildScene() {
+        ensureScene();
         dynamicObjects.forEach((o) => scene.remove(o));
         dynamicObjects = [];
         meshes = [];
@@ -2163,11 +2307,14 @@
           mesh.userData = { task, d, cfg };
 
           const fs = cfg.fontSize;
-          const cv = document.createElement('canvas');
-          const c2 = cv.getContext('2d');
-          c2.font = '500 ' + fs + 'px IBM Plex Mono, monospace';
-          const tw = c2.measureText(task).width;
-          cv.width = tw + 12; cv.height = fs + 8;
+          const measureCanvas = document.createElement('canvas');
+          const measureCtx = measureCanvas.getContext('2d');
+          const textLabel = getTaskLabel(task);
+          measureCtx.font = '500 ' + fs + 'px IBM Plex Mono, monospace';
+          const tw = measureCtx.measureText(textLabel).width;
+          const labelCanvas = createHiDPICanvas(tw + 12, fs + 8);
+          const cv = labelCanvas.cv;
+          const c2 = labelCanvas.cx;
           c2.font = '500 ' + fs + 'px IBM Plex Mono, monospace';
           c2.fillStyle = 'rgba(255,255,255,.7)';
           c2.beginPath();
@@ -2176,7 +2323,7 @@
           c2.fillStyle = '#3a3a3a';
           c2.textAlign = 'left';
           c2.textBaseline = 'middle';
-          c2.fillText(task, 6, (fs + 8) / 2);
+          c2.fillText(textLabel, 6, (fs + 8) / 2);
 
           const lbl = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthTest: false }));
           const scale = (fs / 13) * 0.38;
@@ -2197,21 +2344,13 @@
 
       let theta = 0.75, phi = 1.05, rad = 2.8, drag = false, prev = { x: 0, y: 0 }, autoRot = true, idleTm = null, touchDist = 0;
       function camUp() {
+        if (!camera) return;
         camera.position.set(rad * Math.sin(phi) * Math.sin(theta), rad * Math.cos(phi), rad * Math.sin(phi) * Math.cos(theta));
         camera.lookAt(0,0,0);
       }
-      camUp();
-      renderer.domElement.addEventListener('mousedown', (e) => { drag = true; prev = { x: e.clientX, y: e.clientY }; autoRot = false; clearTimeout(idleTm); });
-      window.addEventListener('mouseup', () => { drag = false; idleTm = setTimeout(() => { autoRot = true; }, 3500); });
-      window.addEventListener('mousemove', (e) => { if (!drag) return; theta -= (e.clientX - prev.x) * .007; phi = Math.max(.15, Math.min(Math.PI - .15, phi + (e.clientY - prev.y) * .007)); prev = { x: e.clientX, y: e.clientY }; camUp(); });
-      renderer.domElement.addEventListener('wheel', (e) => { rad = Math.max(1.5, Math.min(5.5, rad + e.deltaY * .005)); camUp(); e.preventDefault(); }, { passive: false });
-      renderer.domElement.addEventListener('touchstart', (e) => { if (e.touches.length === 1) { drag = true; prev = { x: e.touches[0].clientX, y: e.touches[0].clientY }; autoRot = false; clearTimeout(idleTm); } else if (e.touches.length === 2) { touchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); } }, { passive: false });
-      renderer.domElement.addEventListener('touchmove', (e) => { e.preventDefault(); if (e.touches.length === 1 && drag) { theta -= (e.touches[0].clientX - prev.x) * .007; phi = Math.max(.15, Math.min(Math.PI - .15, phi + (e.touches[0].clientY - prev.y) * .007)); prev = { x: e.touches[0].clientX, y: e.touches[0].clientY }; camUp(); } else if (e.touches.length === 2) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); rad = Math.max(1.5, Math.min(5.5, rad - (d - touchDist) * .01)); touchDist = d; camUp(); } }, { passive: false });
-      renderer.domElement.addEventListener('touchend', () => { drag = false; idleTm = setTimeout(() => { autoRot = true; }, 3500); });
 
-      const ray = new THREE.Raycaster();
-      const msv = new THREE.Vector2();
-      renderer.domElement.addEventListener('mousemove', (e) => {
+      function handleTooltipMove(e) {
+        if (!renderer || !camera || !ray || !msv) return;
         const r = renderer.domElement.getBoundingClientRect();
         msv.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
         ray.setFromCamera(msv, camera);
@@ -2230,25 +2369,158 @@
         } else {
           tt.classList.remove('show');
         }
+      }
+
+      function renderFrame() {
+        if (!renderer || !scene || !camera) return;
+        renderer.render(scene, camera);
+      }
+
+      function bindRendererEvents() {
+        if (!renderer || rendererBound) return;
+        rendererBound = true;
+        renderer.domElement.addEventListener('mousedown', (e) => {
+          drag = true;
+          prev = { x: e.clientX, y: e.clientY };
+          autoRot = false;
+          clearTimeout(idleTm);
+        });
+        renderer.domElement.addEventListener('wheel', (e) => {
+          rad = Math.max(1.5, Math.min(5.5, rad + e.deltaY * .005));
+          camUp();
+          renderFrame();
+          e.preventDefault();
+        }, { passive: false });
+        renderer.domElement.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 1) {
+            drag = true;
+            prev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            autoRot = false;
+            clearTimeout(idleTm);
+          } else if (e.touches.length === 2) {
+            touchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+          }
+        }, { passive: false });
+        renderer.domElement.addEventListener('touchmove', (e) => {
+          e.preventDefault();
+          if (e.touches.length === 1 && drag) {
+            theta -= (e.touches[0].clientX - prev.x) * .007;
+            phi = Math.max(.15, Math.min(Math.PI - .15, phi + (e.touches[0].clientY - prev.y) * .007));
+            prev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            camUp();
+            renderFrame();
+          } else if (e.touches.length === 2) {
+            const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+            rad = Math.max(1.5, Math.min(5.5, rad - (d - touchDist) * .01));
+            touchDist = d;
+            camUp();
+            renderFrame();
+          }
+        }, { passive: false });
+        renderer.domElement.addEventListener('touchend', () => {
+          drag = false;
+          idleTm = setTimeout(() => { autoRot = true; }, 3500);
+        });
+        renderer.domElement.addEventListener('mousemove', handleTooltipMove);
+      }
+
+      function tick() {
+        animationFrameId = null;
+        if (!chartStarted || !chartVisible || !pageVisible) return;
+        if (autoRot) {
+          theta += .003;
+          camUp();
+        }
+        renderFrame();
+        animationFrameId = requestAnimationFrame(tick);
+      }
+
+      function resumeAnimation() {
+        if (!chartStarted || !chartVisible || !pageVisible || animationFrameId) return;
+        animationFrameId = requestAnimationFrame(tick);
+      }
+
+      function pauseAnimation() {
+        if (!animationFrameId) return;
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+
+      async function startChart() {
+        if (chartStarted) {
+          resumeAnimation();
+          return;
+        }
+        chartStarted = true;
+        try {
+          await loadThreeJs();
+          ensureScene();
+          bindRendererEvents();
+          camUp();
+          rebuildScene();
+          renderFrame();
+          resumeAnimation();
+        } catch (error) {
+          chartStarted = false;
+          pauseAnimation();
+        }
+      }
+
+      window.addEventListener('mouseup', () => {
+        drag = false;
+        idleTm = setTimeout(() => { autoRot = true; }, 3500);
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!drag) return;
+        theta -= (e.clientX - prev.x) * .007;
+        phi = Math.max(.15, Math.min(Math.PI - .15, phi + (e.clientY - prev.y) * .007));
+        prev = { x: e.clientX, y: e.clientY };
+        camUp();
+        renderFrame();
       });
 
       window.addEventListener('resize', () => {
-        if (!wrap.clientWidth) return;
+        if (!renderer || !camera || !wrap.clientWidth) return;
         camera.aspect = wrap.clientWidth / wrap.clientHeight;
         camera.updateProjectionMatrix();
+        applyRendererProfile();
         renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+        renderFrame();
       });
 
-      (function loop() {
-        requestAnimationFrame(loop);
-        if (autoRot) { theta += .003; camUp(); }
-        renderer.render(scene, camera);
-      })();
+      document.addEventListener('visibilitychange', function () {
+        pageVisible = document.visibilityState !== 'hidden';
+        if (pageVisible) {
+          resumeAnimation();
+          renderFrame();
+        } else {
+          pauseAnimation();
+        }
+      });
 
-      rebuildScene();
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.target !== wrap) return;
+            chartVisible = entry.isIntersecting && entry.intersectionRatio > 0.18;
+            if (chartVisible) {
+              void startChart();
+            } else {
+              pauseAnimation();
+            }
+          });
+        }, { threshold: [0, 0.18, 0.35] });
+        observer.observe(wrap);
+      } else {
+        chartVisible = true;
+        void startChart();
+      }
+
       window.__quantclawRefresh3DLabels = function () {
+        if (!chartStarted) return;
         tt.classList.remove('show');
         rebuildScene();
+        renderFrame();
       };
     })();
   </script>
