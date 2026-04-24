@@ -320,6 +320,36 @@
       color: var(--blue-glow);
     }
 
+    .btn-github {
+      background: linear-gradient(135deg, #475569, #64748b);
+      border: 1px solid rgba(71, 85, 105, 0.18);
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(71, 85, 105, 0.16);
+    }
+
+    .btn-github:hover {
+      transform: translateY(-2px);
+      border-color: rgba(100, 116, 139, 0.4);
+      color: #ffffff;
+      box-shadow: 0 12px 32px rgba(71, 85, 105, 0.22);
+    }
+
+    .btn-paper {
+      background: linear-gradient(135deg, #fff1df, #fdc98b);
+      border: 1px solid transparent;
+      color: #c06012;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(249, 115, 22, 0.13);
+    }
+
+    .btn-paper:hover {
+      transform: translateY(-2px);
+      border-color: transparent;
+      color: #a84b0f;
+      box-shadow: 0 12px 32px rgba(249, 115, 22, 0.18);
+    }
+
     .stats-bar {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -862,7 +892,49 @@
     }
 
     .bench-table-wrap table {
-      min-width: 700px;
+      min-width: 980px;
+    }
+
+    .benefits-wrap table thead th:first-child,
+    .benefits-wrap table tbody td:first-child,
+    .benefits-wrap table tbody td:nth-child(2) {
+      white-space: nowrap;
+    }
+
+    .benefits-wrap td[rowspan] {
+      vertical-align: middle;
+    }
+
+    .benefits-version-cell {
+      font-weight: 800;
+      color: var(--text-heading);
+      background: #fbfdff;
+    }
+
+    .benefits-model-cell {
+      font-weight: 700;
+      color: var(--text-heading);
+    }
+
+    .benefits-model-cell.plain {
+      font-weight: 400;
+    }
+
+    .benefits-separator td {
+      border-top: 1px solid var(--border);
+    }
+
+    .benefit-row-highlight td {
+      background: linear-gradient(135deg, #f8fbff, #fff7ed);
+    }
+
+    .benefit-best {
+      font-weight: 800;
+      color: var(--text-heading);
+    }
+
+    .benefit-metric {
+      font-variant-numeric: tabular-nums;
     }
 
     .badge {
@@ -876,6 +948,7 @@
     .badge-green { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
     .badge-blue { background: #eff6ff; color: var(--blue-glow); border: 1px solid #bfdbfe; }
     .badge-purple { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+    .badge-orange { background: #fff7ed; color: #c2410c; border: 1px solid #fdba74; }
 
     .tradeoff-tabs {
       display: flex;
@@ -1564,18 +1637,18 @@
       <div class='hero-tag'>OpenClaw Quantization Research</div>
       <h1><span class='word-quant'>Quant</span><span class='word-claw'>Claw</span>: Precision Where It Matters for OpenClaw</h1>
       <p class='hero-sub'>
-        Not every query needs a supercomputer. We benchmarked model quantization across OpenClaw's full task spectrum and developed a router plugin that sends each query exactly where it belongs. Cut costs by ~20%, speed up ~10% without sacrificing capabilities.
+        Not every query needs a supercomputer. We benchmarked model quantization across OpenClaw's full task spectrum and developed a router plugin that sends each query exactly where it belongs. Cut costs by ~20%, speed up ~15% without sacrificing capabilities.
       </p>
       <div class='hero-actions'>
-        <a class='btn-primary' href='#quantclaw'>Explore QuantClaw →</a>
-        <a class='btn-secondary' href='#' target='_blank' rel='noreferrer'>GitHub Link</a>
-        <a class='btn-secondary' href='#' target='_blank' rel='noreferrer'>Paper Link</a>
+        <a class='btn-primary' href='https://clawhub.ai/plugins/%40sparkengineai%2Fquantclaw' target='_blank' rel='noreferrer'>Explore QuantClaw →</a>
+        <a class='btn-secondary btn-github' href='https://github.com/SparkEngineAI/QuantClaw-plugin' target='_blank' rel='noreferrer'>GitHub Link</a>
+        <a class='btn-secondary btn-paper' href='#' target='_blank' rel='noreferrer'>Paper Link</a>
       </div>
       <div class='stats-bar'>
         <div class='stat-item'><div class='stat-num blue'>24</div><div class='stat-label'>Task Types</div></div>
         <div class='stat-item'><div class='stat-num'>9B-744B</div><div class='stat-label'>Model Scale</div></div>
         <div class='stat-item'><div class='stat-num orange'>20%</div><div class='stat-label'>Cost Cut</div></div>
-        <div class='stat-item'><div class='stat-num blue'>10%</div><div class='stat-label'>Speed Up</div></div>
+        <div class='stat-item'><div class='stat-num blue'>15%</div><div class='stat-label'>Speed Up</div></div>
       </div>
       <div class='hero-demo'>
         <img src='./figs/overview.png' alt='QuantClaw overview' />
@@ -1820,30 +1893,30 @@
                   <tr><th>Rank</th><th>Task Category</th><th>Preferred Precision</th><th>Cost Δ (BF16-NVFP4)</th><th>Score Gain</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-30.58%</td><td>+12.27%</td></tr>
-                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-0.68%</td><td>+8.73%</td></tr>
-                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+30.56%</td><td>+6.69%</td></tr>
-                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+17.94%</td><td>+6.50%</td></tr>
-                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+11.82%</td><td>+6.39%</td></tr>
-                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+7.55%</td><td>+6.15%</td></tr>
-                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+24.82%</td><td>+3.57%</td></tr>
-                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+17.83%</td><td>+2.67%</td></tr>
-                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+5.79%</td><td>+2.42%</td></tr>
-                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+24.97%</td><td>+1.37%</td></tr>
-                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+20.66%</td><td>+1.34%</td></tr>
-                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+13.89%</td><td>+1.17%</td></tr>
-                  <tr><td>13</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>-2.46%</td><td>+0.73%</td></tr>
-                  <tr><td>14</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+19.22%</td><td>+0.83%</td></tr>
-                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+25.40%</td><td>+0.63%</td></tr>
-                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+13.23%</td><td>+0.50%</td></tr>
-                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+15.70%</td><td>0.00%</td></tr>
-                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+19.22%</td><td>-0.48%</td></tr>
-                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+3.87%</td><td>-2.64%</td></tr>
-                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>-1.92%</td><td>-2.71%</td></tr>
-                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>-0.56%</td><td>-2.71%</td></tr>
-                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+15.29%</td><td>-6.29%</td></tr>
-                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+25.77%</td><td>-6.84%</td></tr>
-                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+13.59%</td><td>-10.06%</td></tr>
+                  <tr><td>1</td><td><span class="task-type-label">💻 Coding</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+37.37%</td><td>+12.27%</td></tr>
+                  <tr><td>2</td><td><span class="task-type-label">📋 Compliance</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+12.04%</td><td>+8.73%</td></tr>
+                  <tr><td>3</td><td><span class="task-type-label">🖥️ Terminal</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+28.82%</td><td>+6.69%</td></tr>
+                  <tr><td>4</td><td><span class="task-type-label">🛡️ Safety</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+8.87%</td><td>+6.50%</td></tr>
+                  <tr><td>5</td><td><span class="task-type-label">🧩 Synthesis</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+8.09%</td><td>+6.39%</td></tr>
+                  <tr><td>6</td><td><span class="task-type-label">🔄 Workflow</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+14.82%</td><td>+6.15%</td></tr>
+                  <tr><td>7</td><td><span class="task-type-label">📂 Organization</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+15.93%</td><td>+3.57%</td></tr>
+                  <tr><td>8</td><td><span class="task-type-label">⚙️ Operations</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+22.36%</td><td>+2.67%</td></tr>
+                  <tr><td>9</td><td><span class="task-type-label">🔐 Security</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+16.41%</td><td>+2.42%</td></tr>
+                  <tr><td>10</td><td><span class="task-type-label">✍️ Rewriting</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+18.90%</td><td>+1.37%</td></tr>
+                  <tr><td>11</td><td><span class="task-type-label">📁 File_ops</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+21.68%</td><td>+1.34%</td></tr>
+                  <tr><td>12</td><td><span class="task-type-label">💰 Finance</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+18.58%</td><td>+1.17%</td></tr>
+                  <tr><td>13</td><td><span class="task-type-label">🛒 Procurement</span></td><td><span class='badge badge-blue'>16/8-bit</span></td><td>+7.44%</td><td>+0.73%</td></tr>
+                  <tr><td>14</td><td><span class="task-type-label">📰 Content</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+21.22%</td><td>+0.83%</td></tr>
+                  <tr><td>15</td><td><span class="task-type-label">✅ Productivity</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+25.29%</td><td>+0.63%</td></tr>
+                  <tr><td>16</td><td><span class="task-type-label">🛠️ Ops</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+18.61%</td><td>+0.50%</td></tr>
+                  <tr><td>17</td><td><span class="task-type-label">🧠 Memory</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+17.75%</td><td>0.00%</td></tr>
+                  <tr><td>18</td><td><span class="task-type-label">✉️ Communication</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+19.12%</td><td>-0.48%</td></tr>
+                  <tr><td>19</td><td><span class="task-type-label">🔬 Research</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+13.08%</td><td>-2.64%</td></tr>
+                  <tr><td>20</td><td><span class="task-type-label">🖼️ Multimodal</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+11.62%</td><td>-2.71%</td></tr>
+                  <tr><td>21</td><td><span class="task-type-label">📖 Comprehension</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+9.12%</td><td>-4.02%</td></tr>
+                  <tr><td>22</td><td><span class="task-type-label">📚 Knowledge</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+17.47%</td><td>-6.29%</td></tr>
+                  <tr><td>23</td><td><span class="task-type-label">📝 Office QA</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+7.78%</td><td>-6.84%</td></tr>
+                  <tr><td>24</td><td><span class="task-type-label">📊 Data Analysis</span></td><td><span class='badge badge-purple'>4-bit</span></td><td>+22.56%</td><td>-10.06%</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1937,25 +2010,96 @@
 
       <h3 class="benefits-title">Benefits from QuantClaw</h3>
       <p class="benefits-copy">
-        Since task sensitivity analysis is conducted on Claw-Eval using NVFP4 quantization, we also performed experiments on the PinchBench benchmark and INT4 data format to verify the generalizability of our findings. QuantClaw achieves up to 1.09× speedup and 21.7% cost savings on GLM-4.7-Flash, and 1.04× speedup and 6.3% cost savings on GLM-5, compared to the FP8/BF16 baselines, while maintaining or improving accuracy.
+        Since task sensitivity analysis is conducted on Claw-Eval using NVFP4 quantization, we also performed experiments on the PinchBench benchmark and INT4 data format to verify the generalizability of our findings. On GLM-4.7-Flash (PinchBench v1.2.0), QuantClaw improves the average score by 2.85 points over BF16 while reducing cost by 21.6% and latency by 8.4%. On GLM-5 (v2.0.0), it gains 2.09 points over FP8 with 21.4% cost savings and 15.7% latency reduction.
       </p>
       <div class="findings-wrap benefits-wrap">
         <div class='bench-table-wrap'>
           <table>
             <thead>
-              <tr><th>Model</th><th>Approach</th><th>PinchBench (Best / Avg)</th><th class='benefit-cost-head'>Cost(usd) per task</th><th class='benefit-time-head'>Time(s) per task</th></tr>
+              <tr><th>Version</th><th>Model</th><th>Method</th><th>Score (Best / Avg)</th><th class='benefit-cost-head'>Cost (USD)</th><th class='benefit-time-head'>Time (s)</th></tr>
             </thead>
             <tbody>
-              <tr><td>GLM-4.7-Flash</td><td><span class='badge badge-blue'>All BF16</span></td><td>81.57 / 81.26</td><td class='benefit-cost'>0.001598</td><td class='benefit-time'>19.07</td></tr>
-              <tr><td></td><td><span class='badge badge-purple'>All INT4</span></td><td>82.63 / 78.71</td><td class='benefit-cost'>0.001422</td><td class='benefit-time'>21.80</td></tr>
-              <tr class='benefit-row-highlight'><td></td><td><span class='badge badge-green'>QuantClaw</span></td><td>84.11 / 85.46</td><td class='benefit-cost'>0.001252</td><td class='benefit-time'>17.47</td></tr>
-              <tr><td>GLM-5</td><td><span class='badge badge-blue'>All FP8</span></td><td>87.65 / 87.08</td><td class='benefit-cost'>0.0127</td><td class='benefit-time'>34.53</td></tr>
-              <tr><td></td><td><span class='badge badge-purple'>All INT4</span></td><td>90.10 / 88.24</td><td class='benefit-cost'>0.0105</td><td class='benefit-time'>32.19</td></tr>
-              <tr class='benefit-row-highlight'><td></td><td><span class='badge badge-green'>QuantClaw</span></td><td>90.09 / 89.09</td><td class='benefit-cost'>0.0119</td><td class='benefit-time'>33.21</td></tr>
+              <tr>
+                <td rowspan='6' class='benefits-version-cell'>v.1.2.0</td>
+                <td rowspan='3' class='benefits-model-cell'>GLM-4.7-Flash</td>
+                <td><span class='badge badge-blue'>All BF16</span></td>
+                <td class='benefit-metric'>81.57 / 81.26</td>
+                <td class='benefit-cost benefit-metric'>0.001598</td>
+                <td class='benefit-time benefit-metric'>19.07</td>
+              </tr>
+              <tr>
+                <td><span class='badge badge-purple'>All INT4</span></td>
+                <td class='benefit-metric'>82.63 / 78.71</td>
+                <td class='benefit-cost benefit-metric'>0.001422</td>
+                <td class='benefit-time benefit-metric'>21.80</td>
+              </tr>
+              <tr class='benefit-row-highlight'>
+                <td><span class='badge badge-green'>QuantClaw</span></td>
+                <td class='benefit-metric'>85.46 / <span class='benefit-best'>84.11</span></td>
+                <td class='benefit-cost benefit-metric benefit-best'>0.001252</td>
+                <td class='benefit-time benefit-metric benefit-best'>17.47</td>
+              </tr>
+              <tr class='benefits-separator'>
+                <td rowspan='3' class='benefits-model-cell plain'>GLM-5</td>
+                <td><span class='badge badge-orange'>All FP8</span></td>
+                <td class='benefit-metric'>87.65 / 87.08</td>
+                <td class='benefit-cost benefit-metric'>0.0127</td>
+                <td class='benefit-time benefit-metric'>34.53</td>
+              </tr>
+              <tr>
+                <td><span class='badge badge-purple'>All INT4</span></td>
+                <td class='benefit-metric'>90.10 / 88.24</td>
+                <td class='benefit-cost benefit-metric'>0.0105</td>
+                <td class='benefit-time benefit-metric'>32.19</td>
+              </tr>
+              <tr class='benefit-row-highlight'>
+                <td><span class='badge badge-green'>QuantClaw</span></td>
+                <td class='benefit-metric'>90.09 / <span class='benefit-best'>89.09</span></td>
+                <td class='benefit-cost benefit-metric'>0.0119</td>
+                <td class='benefit-time benefit-metric'>33.21</td>
+              </tr>
+              <tr class='benefits-separator'>
+                <td rowspan='6' class='benefits-version-cell'>v2.0.0</td>
+                <td rowspan='3' class='benefits-model-cell'>GLM-4.7-Flash</td>
+                <td><span class='badge badge-blue'>All BF16</span></td>
+                <td class='benefit-metric'>78.19 / 76.95</td>
+                <td class='benefit-cost benefit-metric'>0.00233</td>
+                <td class='benefit-time benefit-metric'>57.10</td>
+              </tr>
+              <tr>
+                <td><span class='badge badge-purple'>All INT4</span></td>
+                <td class='benefit-metric'>75.24 / 73.87</td>
+                <td class='benefit-cost benefit-metric'>0.00232</td>
+                <td class='benefit-time benefit-metric'>54.60</td>
+              </tr>
+              <tr class='benefit-row-highlight'>
+                <td><span class='badge badge-green'>QuantClaw</span></td>
+                <td class='benefit-metric'>79.78 / <span class='benefit-best'>76.95</span></td>
+                <td class='benefit-cost benefit-metric benefit-best'>0.00228</td>
+                <td class='benefit-time benefit-metric benefit-best'>52.35</td>
+              </tr>
+              <tr class='benefits-separator'>
+                <td rowspan='3' class='benefits-model-cell plain'>GLM-5</td>
+                <td><span class='badge badge-orange'>All FP8</span></td>
+                <td class='benefit-metric'>85.72 / 83.50</td>
+                <td class='benefit-cost benefit-metric'>0.0196</td>
+                <td class='benefit-time benefit-metric'>62.22</td>
+              </tr>
+              <tr>
+                <td><span class='badge badge-purple'>All INT4</span></td>
+                <td class='benefit-metric'>89.31 / 81.92</td>
+                <td class='benefit-cost benefit-metric'>0.0169</td>
+                <td class='benefit-time benefit-metric'>58.99</td>
+              </tr>
+              <tr class='benefit-row-highlight'>
+                <td><span class='badge badge-green'>QuantClaw</span></td>
+                <td class='benefit-metric'>87.25 / <span class='benefit-best'>85.59</span></td>
+                <td class='benefit-cost benefit-metric benefit-best'>0.0154</td>
+                <td class='benefit-time benefit-metric benefit-best'>52.46</td>
+              </tr>
             </tbody>
           </table>
         </div>
-        <div class='content-card' style='border:none; border-radius:0; box-shadow:none; padding-top:1rem;'><p><em>More results will be updated soon</em></p></div>
       </div>
 
       <div class='quote-card'>
@@ -2020,30 +2164,30 @@
       }
 
       const DATA = {
-        coding:        { score: 12.27, speed: 13.58, Cost: -30.58 },
-        communication: { score: -0.48, speed: -14.30, Cost: 19.22 },
-        compliance:    { score: 8.73, speed: 7.32, Cost: -0.68 },
-        comprehension: { score: -4.02, speed: 7.69, Cost: -0.56 },
-        content:       { score: 0.83, speed: -5.08, Cost: 19.22 },
-        data_analysis: { score: -10.06, speed: 0.75, Cost: 13.59 },
-        file_ops:      { score: 1.34, speed: 9.96, Cost: 20.66 },
-        finance:       { score: 1.17, speed: 6.79, Cost: 13.89 },
-        knowledge:     { score: -6.29, speed: -0.01, Cost: 15.29 },
-        memory:        { score: 0.00, speed: 33.86, Cost: 15.70 },
-        multimodal:    { score: -2.71, speed: 46.88, Cost: -1.92 },
-        office_qa:     { score: -6.84, speed: -4.41, Cost: 25.77 },
-        operations:    { score: 2.67, speed: -3.07, Cost: 17.83 },
-        ops:           { score: 0.50, speed: -1.26, Cost: 13.23 },
-        organization:  { score: 3.57, speed: 1.42, Cost: 24.82 },
-        procurement:   { score: 0.73, speed: -12.13, Cost: -2.46 },
-        productivity:  { score: 0.63, speed: 2.62, Cost: 25.40 },
-        research:      { score: -2.64, speed: -26.09, Cost: 3.87 },
-        rewriting:     { score: 1.37, speed: 0.32, Cost: 24.97 },
-        safety:        { score: 6.50, speed: -9.12, Cost: 17.94 },
-        security:      { score: 2.42, speed: -17.38, Cost: 5.79 },
-        synthesis:     { score: 6.39, speed: -4.88, Cost: 11.82 },
-        terminal:      { score: 6.69, speed: 16.66, Cost: 30.56 },
-        workflow:      { score: 6.15, speed: -13.64, Cost: 7.55 }
+        coding:        { score: 12.27, speed: 13.58, Cost: 37.37 },
+        communication: { score: -0.48, speed: -14.30, Cost: 19.12 },
+        compliance:    { score: 8.73, speed: 7.32, Cost: 12.04 },
+        comprehension: { score: -4.02, speed: 7.69, Cost: 9.12 },
+        content:       { score: 0.83, speed: -5.08, Cost: 21.22 },
+        data_analysis: { score: -10.06, speed: 0.75, Cost: 22.56 },
+        file_ops:      { score: 1.34, speed: 9.96, Cost: 21.68 },
+        finance:       { score: 1.17, speed: 6.79, Cost: 18.58 },
+        knowledge:     { score: -6.29, speed: -0.01, Cost: 17.47 },
+        memory:        { score: 0.00, speed: 33.86, Cost: 17.75 },
+        multimodal:    { score: -2.71, speed: 46.88, Cost: 11.62 },
+        office_qa:     { score: -6.84, speed: -4.41, Cost: 7.78 },
+        operations:    { score: 2.67, speed: -3.07, Cost: 22.36 },
+        ops:           { score: 0.50, speed: -1.26, Cost: 18.61 },
+        organization:  { score: 3.57, speed: 1.42, Cost: 15.93 },
+        procurement:   { score: 0.73, speed: -12.13, Cost: 7.44 },
+        productivity:  { score: 0.63, speed: 2.62, Cost: 25.29 },
+        research:      { score: -2.64, speed: -26.09, Cost: 13.08 },
+        rewriting:     { score: 1.37, speed: 0.32, Cost: 18.90 },
+        safety:        { score: 6.50, speed: -9.12, Cost: 8.87 },
+        security:      { score: 2.42, speed: -17.38, Cost: 16.41 },
+        synthesis:     { score: 6.39, speed: -4.88, Cost: 8.09 },
+        terminal:      { score: 6.69, speed: 16.66, Cost: 28.82 },
+        workflow:      { score: 6.15, speed: -13.64, Cost: 14.82 }
       };
 
       const PALETTE = [
@@ -2615,25 +2759,25 @@
           coding: "编程",
           communication: "沟通",
           compliance: "合规",
-          comprehension: "理解",
-          content: "内容",
+          comprehension: "阅读理解",
+          content: "内容整理",
           data_analysis: "数据分析",
           file_ops: "文件操作",
-          finance: "金融",
+          finance: "财务",
           knowledge: "知识",
           memory: "记忆",
           multimodal: "多模态",
-          office_qa: "办公问答",
-          operations: "运维",
-          ops: "运维操作",
-          organization: "组织",
+          office_qa: "文档问答",
+          operations: "运营",
+          ops: "运维",
+          organization: "整理归类",
           procurement: "采购",
-          productivity: "生产力",
-          research: "研究",
+          productivity: "效率办公",
+          research: "调研",
           rewriting: "改写",
-          safety: "安全",
-          security: "安全防护",
-          synthesis: "综合",
+          safety: "安全防护",
+          security: "网络安全",
+          synthesis: "信息综合",
           terminal: "终端",
           workflow: "工作流"
         },
@@ -2644,25 +2788,25 @@
         Coding: "编程",
         Communication: "沟通",
         Compliance: "合规",
-        Comprehension: "理解",
-        Content: "内容",
+        Comprehension: "阅读理解",
+        Content: "内容整理",
         "Data Analysis": "数据分析",
         File_ops: "文件操作",
-        Finance: "金融",
+        Finance: "财务",
         Knowledge: "知识",
         Memory: "记忆",
         Multimodal: "多模态",
-        "Office QA": "办公问答",
-        Operations: "运维",
-        Ops: "运维操作",
-        Organization: "组织",
+        "Office QA": "文档问答",
+        Operations: "运营",
+        Ops: "运维",
+        Organization: "整理归类",
         Procurement: "采购",
-        Productivity: "生产力",
-        Research: "研究",
+        Productivity: "效率办公",
+        Research: "调研",
         Rewriting: "改写",
-        Safety: "安全",
-        Security: "安全防护",
-        Synthesis: "综合",
+        Safety: "安全防护",
+        Security: "网络安全",
+        Synthesis: "信息综合",
         Terminal: "终端",
         Workflow: "工作流"
       };
@@ -2674,7 +2818,7 @@
           navBadge: "Research Blog",
           heroTag: "OpenClaw Quantization Research",
           heroTitle: "<span class='word-quant'>Quant</span><span class='word-claw'>Claw</span>: Precision Where It Matters for OpenClaw",
-          heroSub: "Not every query needs a supercomputer. We benchmarked model quantization across OpenClaw's full task spectrum and developed a router plugin that sends each query exactly where it belongs. Cut costs by ~20%, speed up ~10% without sacrificing capabilities.",
+          heroSub: "Not every query needs a supercomputer. We benchmarked model quantization across OpenClaw's full task spectrum and developed a router plugin that sends each query exactly where it belongs. Cut costs by ~20%, speed up ~15% without sacrificing capabilities.",
           heroButtons: ["Explore QuantClaw →", "GitHub Link", "Paper Link"],
           stats: ["Task Types", "Model Scale", "Cost Cut", "Speed Up"],
           backgroundTag: "Background",
@@ -2745,10 +2889,9 @@
             "QuantClaw includes a built-in dashboard for monitoring routing behavior, token usage, cost, and detection results in real time. It also supports live configuration and testing, making QuantClaw an observable and tunable routing layer within OpenClaw."
           ],
           benefitsTitle: "Benefits from QuantClaw",
-          benefitsCopy: "Since task sensitivity analysis is conducted on Claw-Eval using NVFP4 quantization, we also performed experiments on the PinchBench benchmark and INT4 data format to verify the generalizability of our findings. QuantClaw achieves up to 1.09× speedup and 21.7% cost savings on GLM-4.7-Flash, and 1.04× speedup and 6.3% cost savings on GLM-5, compared to the FP8/BF16 baselines, while maintaining or improving accuracy.",
-          benefitHeaders: ["Model", "Approach", "PinchBench (Best / Avg)", "Cost(usd) per task", "Time(s) per task"],
-          benefitBadges: ["All BF16", "All INT4", "QuantClaw", "All FP8", "All INT4", "QuantClaw"],
-          moreResults: "<em>More results will be updated soon</em>",
+          benefitsCopy: "Since task sensitivity analysis is conducted on Claw-Eval using NVFP4 quantization, we also performed experiments on the PinchBench benchmark and INT4 data format to verify the generalizability of our findings. On GLM-4.7-Flash (PinchBench v1.2.0), QuantClaw improves the average score by 2.85 points over BF16 while reducing cost by 21.6% and latency by 8.4%. On GLM-5 (v2.0.0), it gains 2.09 points over FP8 with 21.4% cost savings and 15.7% latency reduction.",
+          benefitHeaders: ["Version", "Model", "Method", "Score (Best / Avg)", "Cost (USD)", "Time (s)"],
+          benefitBadges: ["All BF16", "All INT4", "QuantClaw", "All FP8", "All INT4", "QuantClaw", "All BF16", "All INT4", "QuantClaw", "All FP8", "All INT4", "QuantClaw"],
           biggerPictureTitle: "The Bigger Picture",
           biggerQuote: "The future of personal AI assistants are not a single model running at maximum capacity all the time. It is a coordinated OpenClaw system where models of different strengths are dispatched intelligently according to the work that actually needs to be done.",
           biggerBody: "QuantClaw shows what OpenClaw can become when orchestration is treated as a first-class capability rather than an afterthought. The value of OpenClaw is not just that it can connect to many models, but that it can decide how those models should be used together. Most user requests do not need maximum capability, maximum cost, and maximum latency all at once. What they need is the right level of capability for the task. QuantClaw gives OpenClaw that decision layer: routing lightweight tasks to cheaper precision tiers, preserving stronger models for more demanding work, and making the entire system more efficient without increasing user complexity. In that sense, QuantClaw is not just a plugin for OpenClaw; it is a concrete example of how OpenClaw becomes a real multi-model collaborative system.",
@@ -2761,7 +2904,7 @@
           navBadge: "研究博客",
           heroTag: "OpenClaw量化研究",
           heroTitle: "<span class='word-quant'>Quant</span><span class='word-claw'>Claw</span>：按需精度，为OpenClaw量身而量",
-          heroSub: "并不是每个查询都需要超级计算机。我们系统评测了OpenClaw在不同任务上的模型量化表现，并开发了一个路由插件，把每个查询发送到最合适的精度层级。在不牺牲能力的前提下，实现~20%成本降低和~10%速度提升。",
+          heroSub: "并不是每个查询都需要超级计算机。我们系统评测了OpenClaw在不同任务上的模型量化表现，并开发了一个路由插件，把每个查询发送到最合适的精度层级。在不牺牲能力的前提下，实现~20%成本降低和~15%速度提升。",
           heroButtons: ["使用QuantClaw →", "GitHub 链接", "论文链接"],
           stats: ["任务类型", "模型规模", "成本下降", "速度提升"],
           backgroundTag: "背景",
@@ -2816,7 +2959,7 @@
           routingSpeedHeaders: ["排名", "任务类别", "推荐精度", "速度差", "得分差"],
           routingCostHeaders: ["排名", "任务类别", "推荐精度", "成本差", "得分差"],
           speedRecommendation: "<strong>建议</strong>对于<strong>速度敏感型应用</strong>，底部7类任务更适合使用4-bit，因为这样能够带来更快推理，或至少在保持/提升质量的同时获得速度优势。顶部17类精度敏感任务则应保留16/8-bit，以在可接受的速度代价下维持准确性。",
-          costRecommendation: "<strong>建议：</strong>对于<strong>成本敏感型应用</strong>，底部11类任务更适合使用4-bit，因为它们在获得显著成本节省的同时，得分影响为正向或基本中性（-10.06%到+0.83%）。顶部13类任务中，量化会明显损害得分表现，尤其是编程、安全与合规，得分损失超过5%，因此更值得承担高精度成本。",
+          costRecommendation: "<strong>建议：</strong>对于<strong>成本敏感型应用</strong>，底部11类任务更适合使用4-bit，因为它们在获得显著成本节省的同时，量化的得分影响为正向或基本中性（-10.06%到+0.83%）。顶部13类任务中，量化会明显损害得分表现，尤其是编程、安全与合规，得分损失超过5%，因此更值得承担高精度成本。",
           chartTitle: "⚖️ 得分 vs 速度 vs 成本",
           chartSubtitle: "X：速度差 · Y（垂直）：得分差 · Z：成本差",
           chartHint: "<span>&#x21ba;</span> 拖拽旋转 &nbsp;&middot;&nbsp; <span>&#x2295;</span> 滚轮缩放 &nbsp;&middot;&nbsp; <span>&#x25C9;</span> 悬停查看详情 &nbsp;&middot;&nbsp; 3秒无操作后自动旋转",
@@ -2832,10 +2975,9 @@
             "QuantClaw内置了用于监控路由行为、token使用、成本和检测结果的实时看板，也支持在线配置与测试，使其成为OpenClaw中一个可观测、可调优的路由层。"
           ],
           benefitsTitle: "QuantClaw带来的收益",
-          benefitsCopy: "由于任务敏感性分析是在Claw-Eval上基于NVFP4量化完成的，我们还在PinchBench基准测试和INT4数据格式上进行了实验，以验证这些结论的泛化性。相较于BF16基线，QuantClaw在GLM-4.7-Flash上实现了最高1.09×加速与21.7%成本节省。相较于FP8基线，在GLM-5上实现了1.04×加速与6.3%成本节省，同时保持甚至提升了准确率。",
-          benefitHeaders: ["模型", "方案", "PinchBench（最佳 / 平均）", "每任务成本（USD）", "每任务耗时（s）"],
-          benefitBadges: ["全BF16", "全INT4", "QuantClaw", "全FP8", "全INT4", "QuantClaw"],
-          moreResults: "<em>更多结果即将更新</em>",
+          benefitsCopy: "由于任务敏感性分析是在Claw-Eval上基于NVFP4量化完成的，我们还在PinchBench基准测试和INT4数据格式上进行了实验，以验证这些结论的泛化性。在GLM-4.7-Flash（PinchBench v1.2.0）上，QuantClaw相较于BF16将平均得分提升了2.85分，同时将成本降低了21.6%，并将时延降低了8.4%。在GLM-5（v2.0.0）上，QuantClaw相较于FP8将得分提升了2.09分，同时实现了21.4%的成本节省和15.7%的加速。",
+          benefitHeaders: ["版本", "模型", "方法", "得分（最佳 / 平均）", "成本（USD）", "耗时（s）"],
+          benefitBadges: ["全BF16", "全INT4", "QuantClaw", "全FP8", "全INT4", "QuantClaw", "全BF16", "全INT4", "QuantClaw", "全FP8", "全INT4", "QuantClaw"],
           biggerPictureTitle: "更大的图景",
           biggerQuote: "个人AI助手的未来，不会是单一模型始终以最大能力满负荷运行，而会是一个协同的OpenClaw系统：根据真实任务需求，智能调度不同能力的模型。",
           biggerBody: "QuantClaw展示了当编排能力被视为核心能力而不是事后补丁时，OpenClaw能演化成什么样子。OpenClaw的价值不仅在于它能连接多个模型，还应在于它能决定这些模型如何协同工作。大多数用户请求并不需要同时获得最大能力、最高成本和最长时延，它们真正需要的是与任务匹配的能力层级。QuantClaw为OpenClaw提供了这样一层决策能力：把轻量任务路由到更便宜的精度层级，把更强模型保留给更复杂的工作，在不增加用户复杂度的情况下提升整个系统效率。从这个意义上说，QuantClaw不只是OpenClaw的一个插件，更是OpenClaw如何成为真正多模型协同系统的具体范例。",
@@ -2987,7 +3129,6 @@
         setText("#quantclaw .benefits-copy", t.benefitsCopy);
         setAllText("#quantclaw .benefits-wrap thead th", t.benefitHeaders);
         updateBenefitBadges(t.benefitBadges);
-        setHTML("#quantclaw .benefits-wrap .content-card p", t.moreResults);
         setText("#quantclaw .quote-card h3", t.biggerPictureTitle);
         setText("#quantclaw .quote-card blockquote", t.biggerQuote);
         setText("#quantclaw .quote-card > p", t.biggerBody);
